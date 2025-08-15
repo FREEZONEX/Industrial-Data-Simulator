@@ -7,7 +7,7 @@ class MqttPublisher:
     def __init__(self, racks, broker="test.mosquitto.org", port=1883, keepalive=60):
         self.racks = racks
         self.power_aggregator = Power_aggregator(racks)
-        self.broker = broker  # 换emcq
+        self.broker = broker  # 换emqx
         self.port = port
         self.keepalive = keepalive
         self.client = mqtt.Client()
@@ -38,7 +38,7 @@ class MqttPublisher:
 
 if __name__ == "__main__":
     rack_ids = ["Rack-A01", "Rack-A02", "Rack-A03", "Rack-A04", "Rack-A05", "Rack-A06"]
-    racks = [Rack(rid, 0) for rid in rack_ids]
+    racks = [Rack(rid, 150) for rid in rack_ids]
 
     publisher = MqttPublisher(racks)
     publisher.connect()
