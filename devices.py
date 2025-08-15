@@ -256,6 +256,12 @@ class Rack:
     def set_load(self, value):
         self.power_draw_kw = value
 
+    def add_load(self, value):
+        self.power_draw_kw += value
+
+    def get_load(self):
+        return self.power_draw_kw
+
 # 所有服务器机柜
 class Power_aggregator:
     def __init__(self, racks: list[Rack]):
@@ -269,3 +275,30 @@ class Power_aggregator:
             "unit": "kW"
         }
         return topic, payload
+
+class Runtime:
+    def __init__(self, ct301=0, cdwp301=0, chiller201=0, racks=0, chwp201=0, crah101=0):
+        self.ct301 = ct301
+        self.cdwp301 = cdwp301
+        self.chiller201 = chiller201
+        self.racks = racks
+        self.chwp201=chwp201
+        self.crah101 = crah101
+
+    def get_value(self, key):
+        if hasattr(self, key):
+            return getattr(self, key)
+        else:
+            raise KeyError(f"No such key: {key}")
+        
+    def set_value(self, value, key):
+        if hasattr(self, key):
+            setattr(self, key, value)
+        else:
+            raise KeyError(f"No such key: {key}")
+        
+    def add_value(self, value, key):
+        if hasattr(self, key):
+            setattr(self, key, getattr(self, key) + value)
+        else:
+            raise KeyError(f"No such key: {key}")
