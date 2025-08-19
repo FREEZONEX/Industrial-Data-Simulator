@@ -1,58 +1,31 @@
 import struct
 
-# 冷水机组
-class Chiller:
-    def __init__(self, context, condenser_entering_water_temp, condenser_leaving_water_temp, refrigerant_condensing_pressure, state, 
-                 chilled_water_leaving_temp, chilled_water_entering_temp, refrigerant_evaporating_pressure, compressor_load, total_power_consumption):
-        
-        self.context = context
-        self.condenser_entering_water_temp = condenser_entering_water_temp
-        self.condenser_leaving_water_temp = condenser_leaving_water_temp
-        self.refrigerant_condensing_pressure = refrigerant_condensing_pressure
-        self.state = state
-        self.chilled_water_leaving_temp = chilled_water_leaving_temp
-        self.chilled_water_entering_temp = chilled_water_entering_temp
-        self.refrigerant_evaporating_pressure = refrigerant_evaporating_pressure
-        self.compressor_load = compressor_load
-        self.total_power_consumption = total_power_consumption
-        
-        field_names = [
-            "condenser_entering_water_temp",
-            "condenser_leaving_water_temp",
-            "refrigerant_condensing_pressure",
-            "state",
-            "chilled_water_leaving_temp",
-            "chilled_water_entering_temp",
-            "refrigerant_evaporating_pressure",
-            "compressor_load",
-            "total_power_consumption",
-        ]
-        addresses = [0, 2, 4, 6, 10, 12, 14, 16, 18]
-        self.field_addresses = dict(zip(field_names, addresses))
+import struct
 
+class ModbusDevice:
+    def __init__(self, context, field_values, field_addresses, context_index):
+        """
+        :param context: Modbus device context
+        :param field_values: dict of field_name -> initial value
+        :param field_addresses: dict of field_name -> modbus address
+        :param context_index: which context in self.context to use
+        """
+        self.context = context
+        self.context_index = context_index
+        self.field_addresses = field_addresses
+        # 初始化属性
+        for key, val in field_values.items():
+            setattr(self, key, val)
 
     def _float_to_regs(self, value, byteorder=">"):
-        """
-        Convert float to two 16-bit registers using IEEE754 single precision.
-        :param byteorder: '>' big-endian (Modbus standard), '<' little-endian
-        """
-        packed = struct.pack(f'{byteorder}f', value)  # 4 bytes
+        packed = struct.pack(f'{byteorder}f', value)
         return list(struct.unpack(f'{byteorder}HH', packed))
     
     def _str_to_regs(self, text: str, max_regs=4):
-        """
-        Convert string to Modbus register list.
-        :param text: The string to encode.
-        :param max_regs: Optional maximum number of registers (truncate if longer).
-        :return: list of integers (each is 0..65535).
-        """
-        # Convert to bytes (ASCII or UTF-8)
         b = text.encode("ascii")
         if len(b) % 2 == 1:
             b += b'\x00'
-        regs = []
-        for i in range(0, len(b), 2):
-            regs.append((b[i] << 8) | b[i+1])
+        regs = [(b[i] << 8) | b[i+1] for i in range(0, len(b), 2)]
         if max_regs is not None:
             regs = regs[:max_regs]
         return regs    
@@ -63,21 +36,18 @@ class Chiller:
         elif isinstance(value, int):
             regs = [value]
         elif isinstance(value, str):
-            regs = self._str_to_regs(value)  # 最多占4个寄存器=8字节
+            regs = self._str_to_regs(value)
         else:
             raise TypeError(f"Unsupported type: {type(value)}")
-        self.context[2].setValues(3, address, regs)
+        self.context[self.context_index].setValues(3, address, regs)
 
     def store_all(self):
-        for _, (addr, val) in self.field_addresses.items():
-            self._store_value(addr, val)
+        for key, addr in self.field_addresses.items():
+            self._store_value(addr, getattr(self, key))
            
     def store(self, key):
-        # Store one field by key name.
         if key in self.field_addresses:
-            addr = self.field_addresses[key]
-            val = getattr(self, key)
-            self._store_value(addr, val)
+            self._store_value(self.field_addresses[key], getattr(self, key))
 
     def update_value(self, key, value):
         if hasattr(self, key):
@@ -85,105 +55,59 @@ class Chiller:
         else:
             raise KeyError(f"No such key: {key}")
 
-    def report(self):
-        return {
-            "condenser_entering_water_temp (°C)": self.condenser_entering_water_temp,
-            "condenser_leaving_water_temp (°C)": self.condenser_leaving_water_temp,
-            "refrigerant_condensing_pressure (kPa)" : self.refrigerant_condensing_pressure,
-            "state": self.state,
-            "chilled_water_leaving_temp (°C)": self.chilled_water_leaving_temp,
-            "chilled_water_entering_temp (°C)": self.chilled_water_entering_temp,
-            "refrigerant_evaporating_pressure (kPa)": self.refrigerant_evaporating_pressure,
-            "compressor_load (%)": self.compressor_load,
-            "total_power_consumption (kW)": self.total_power_consumption,
+
+# 冷水机组
+class Chiller(ModbusDevice):
+    def __init__(self, context, condenser_entering_water_temp, condenser_leaving_water_temp, 
+                 refrigerant_condensing_pressure, state, chilled_water_leaving_temp, chilled_water_entering_temp, 
+                 refrigerant_evaporating_pressure, compressor_load, total_power_consumption):
+        
+        fields = {
+            "condenser_entering_water_temp": condenser_entering_water_temp,
+            "condenser_leaving_water_temp": condenser_leaving_water_temp,
+            "refrigerant_condensing_pressure": refrigerant_condensing_pressure,
+            "state": state,
+            "chilled_water_leaving_temp": chilled_water_leaving_temp,
+            "chilled_water_entering_temp": chilled_water_entering_temp,
+            "refrigerant_evaporating_pressure": refrigerant_evaporating_pressure,
+            "compressor_load": compressor_load,
+            "total_power_consumption": total_power_consumption
         }
+        addresses = {
+            "condenser_entering_water_temp": 0,
+            "condenser_leaving_water_temp": 2,
+            "refrigerant_condensing_pressure": 4,
+            "state": 6,
+            "chilled_water_leaving_temp": 10,
+            "chilled_water_entering_temp": 12,
+            "refrigerant_evaporating_pressure": 14,
+            "compressor_load": 16,
+            "total_power_consumption": 18
+        }
+        super().__init__(context, fields, addresses, context_index=2)
+
 
 # 冷却塔
-class CoolingTower:
+class CoolingTower(ModbusDevice):
     def __init__(self, context, state, tower_top_air_temp, tower_basin_temp, entering_water_temp, fan_speed, basin_water_level):
-
-        self.context = context
-        self.state = state
-        self.tower_top_air_temp = tower_top_air_temp
-        self.tower_basin_temp = tower_basin_temp
-        self.entering_water_temp = entering_water_temp
-        self.fan_speed = fan_speed
-        self.basin_water_level = basin_water_level
-
-        field_names = [
-            "state",
-            "tower_top_air_temp",
-            "tower_basin_temp",
-            "entering_water_temp",
-            "fan_speed",
-            "basin_water_level",
-        ]
-        addresses = [0, 4, 6, 8, 10, 12]
-        self.field_addresses = dict(zip(field_names, addresses))
-
-    def _float_to_regs(self, value, byteorder=">"):
-        """
-        Convert float to two 16-bit registers using IEEE754 single precision.
-        :param byteorder: '>' big-endian (Modbus standard), '<' little-endian
-        """
-        packed = struct.pack(f'{byteorder}f', value)  # 4 bytes
-        return list(struct.unpack(f'{byteorder}HH', packed))
-    
-    def _str_to_regs(self, text: str, max_regs=4):
-        """
-        Convert string to Modbus register list.
-        :param text: The string to encode.
-        :param max_regs: Optional maximum number of registers (truncate if longer).
-        :return: list of integers (each is 0..65535).
-        """
-        # Convert to bytes (ASCII or UTF-8)
-        b = text.encode("ascii")
-        if len(b) % 2 == 1:
-            b += b'\x00'
-        regs = []
-        for i in range(0, len(b), 2):
-            regs.append((b[i] << 8) | b[i+1])
-        if max_regs is not None:
-            regs = regs[:max_regs]
-        return regs    
-
-    def _store_value(self, address, value):
-        if isinstance(value, float):
-            regs = self._float_to_regs(value)
-        elif isinstance(value, int):
-            regs = [value]
-        elif isinstance(value, str):
-            regs = self._str_to_regs(value)  # 最多占4个寄存器=8字节
-        else:
-            raise TypeError(f"Unsupported type: {type(value)}")
-        self.context[1].setValues(3, address, regs)
-
-    def store_all(self):
-        for _, (addr, val) in self.field_addresses.items():
-            self._store_value(addr, val)
-           
-    def store(self, key):
-        # Store one field by key name.
-        if key in self.field_addresses:
-            addr = self.field_addresses[key]
-            val = getattr(self, key)
-            self._store_value(addr, val)
-
-    def update_value(self, key, value):
-        if hasattr(self, key):
-            setattr(self, key, value)
-        else:
-            raise KeyError(f"No such key: {key}")
-
-    def report(self):
-        return {
-            "state": self.state,
-            "tower_top_air_temp (°C)": self.tower_top_air_temp,
-            "tower_basin_temp (°C)": self.tower_basin_temp,
-            "entering_water_temp (°C)": self.entering_water_temp,
-            "fan_speed (%)": self.fan_speed,
-            "basin_water_level (%)": self.basin_water_level,
+        fields = {
+            "state": state,
+            "tower_top_air_temp": tower_top_air_temp,
+            "tower_basin_temp": tower_basin_temp,
+            "entering_water_temp": entering_water_temp,
+            "fan_speed": fan_speed,
+            "basin_water_level": basin_water_level
         }
+        addresses = {
+            "state": 0,
+            "tower_top_air_temp": 4,
+            "tower_basin_temp": 6,
+            "entering_water_temp": 8,
+            "fan_speed": 10,
+            "basin_water_level": 12
+        }
+        super().__init__(context, fields, addresses, context_index=1)
+
 
 # 冷凝水泵
 class Pump:
