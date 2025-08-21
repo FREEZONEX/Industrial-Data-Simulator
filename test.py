@@ -4,7 +4,7 @@
 # client.connect()
 
 # result = client.read_holding_registers(
-#     address=0,
+#     address=8,
 #     count=4,
 #     device_id=1
 # )  # 读取 Holding Register 第0位
@@ -14,7 +14,6 @@
 #     print("Read error:", result)
 
 # client.close()
-
 
 
 # import netifaces
@@ -36,7 +35,7 @@
 
 # async def main():
 #     local_cidr = get_local_ip_cidr()
-#     bacnet = BAC0.connect(ip="10.10.10.113/24:50000")
+#     bacnet = BAC0.connect(ip="192.168.151.134/24:50000")
 
 #     object_type = 'analogInput'
 #     instance_number = 1
@@ -49,12 +48,12 @@
 #     # bacnet.write(f'{local_cidr} {object_type} {instance_number} {property_name} {new_value}')
 #     # print("writted")
 
-#     value1 = await bacnet.read(f'10.10.10.113 analogInput 0 presentValue')
-#     value2 = await bacnet.read(f'10.10.10.113 analogInput 1 presentValue')
-#     value3 = await bacnet.read(f'10.10.10.113 analogInput 2 presentValue')
-#     value4 = await bacnet.read(f'10.10.10.113 analogInput 3 presentValue')
-#     value5 = await bacnet.read(f'10.10.10.113 characterstringValue 0 presentValue')
-#     print(f'The present value of is: {value1} {value2} {value3} {value4} {value5}')
+#     value1 = await bacnet.read(f'192.168.151.134 analogInput 0 presentValue')
+#     value2 = await bacnet.read(f'192.168.151.134 analogInput 1 presentValue')
+#     value3 = await bacnet.read(f'192.168.151.134 analogInput 2 presentValue')
+#     value4 = await bacnet.read(f'192.168.151.134 analogInput 3 presentValue')
+#     value5 = await bacnet.read(f'192.168.151.134 characterstringValue 0 presentValue')
+#     print(f'The present value is: {value1} {value2} {value3} {value4} {value5}')
 
 #     # 等待一会确保写操作完成
 #     await asyncio.sleep(1)
@@ -79,7 +78,7 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     print(f"收到消息: topic={msg.topic}, payload={msg.payload.decode()}")
 
-broker = "test.mosquitto.org"
+broker = "localhost"
 client = mqtt.Client()
 
 client.on_connect = on_connect
@@ -88,3 +87,4 @@ client.on_message = on_message
 client.connect(broker, 1883, 60)
 
 client.loop_forever()
+
