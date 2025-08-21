@@ -49,8 +49,12 @@ jobs:
           docker tag suposce/ids:${TAG} suposce/ids:${TAG}
           docker push suposce/ids:${TAG} 
 
+          docker tag suposce/ids:${TAG} suposce/ids:latest
+          docker push suposce/ids:latest
+
           docker rmi suposce/ids:${TIMESTAMP}
-          docker rmi suposce/ids:${TAG}                    
+          docker rmi suposce/ids:${TAG} 
+          docker rmi suposce/ids:latest                   
 
       - name: Clean up
         run: |
