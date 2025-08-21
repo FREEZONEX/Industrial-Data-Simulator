@@ -4,9 +4,9 @@ from devices import Chiller, CoolingTower
 import asyncio
 
 class ModbusServer:
-    def __init__(self, ct301: CoolingTower, chiller201:Chiller, address=("0.0.0.0", 5020), update_interval=10):
+    def __init__(self, ct301: CoolingTower, chiller201:Chiller, address=("0.0.0.0", 5020), config={}):
         self.address = address
-        self.update_interval = update_interval
+        self.config = config
 
         # 初始化设备
         self.ct301 = ct301
@@ -30,7 +30,7 @@ class ModbusServer:
             self.ct301.store_all(self.context, 1)
             self.chiller201.store_all(self.context, 2)
             print("Modbus_Slave Context Updated.")
-            await asyncio.sleep(self.update_interval)
+            await asyncio.sleep(self.config["SERVER_UPDATE_INTERNAL"])
 
     async def start(self):
         """启动 Modbus 服务器"""

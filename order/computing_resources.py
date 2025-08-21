@@ -1,13 +1,15 @@
 from flask import Flask, request, jsonify
 import psycopg2
 import json
+# import main
 # from datetime import datetime
 # import paho.mqtt.client as mqtt
 # from simulation import simulation
 
 class ServiceOrderAPI:
-    def __init__(self, db_config):
+    def __init__(self, db_config, config):
         self.db_config = db_config
+        self.config = config
         self.app = Flask(__name__)
         self._create_table()
         self._register_routes()
@@ -42,6 +44,10 @@ class ServiceOrderAPI:
         @self.app.route("/api/v1/orders", methods=["GET"])
         def list_order():
             return self.list_order(request.args)
+        
+        @self.app.route("/api/v1/config", methods=["POST"])
+        def update_config():
+            return self.update_config(request.json)
 
     def create_order(self, data):
         customer_id = data.get("customer_id")
@@ -117,19 +123,34 @@ class ServiceOrderAPI:
             return jsonify(result), 200
         except Exception as e:
             return jsonify({"status": "fail", "error": str(e)}), 500
+        
+    def update_config(self, data):
+        response = {}
+        if "SERVER_UPDATE_INTERNAL" in data:
+            self.config["SERVER_UPDATE_INTERNAL"] = float(data["SERVER_UPDATE_INTERNAL"])
+            response["SERVER_UPDATE_INTERNAL"] = self.config["SERVER_UPDATE_INTERNAL"]
+        if "RANDOM_UPDATE_INTERVAL" in data:
+            self.config["RANDOM_UPDATE_INTERVAL"] = float(data["RANDOM_UPDATE_INTERVAL"])
+            response["RANDOM_UPDATE_INTERVAL"] = self.config["RANDOM_UPDATE_INTERVAL"]
+
+        return jsonify({"status": "ok", "updated": response}), 200
 
     def run(self, host="0.0.0.0", port=5000, debug=True):
         self.app.run(host=host, port=port, debug=debug)
 
 
-# if __name__ == "__main__":
-#     db_config = {
-#         'host': 'localhost',
-#         'port': 5432,
-#         'dbname': 'mydatabase',
-#         'user': 'myuser',
-#         'password': 'mypassword'
-#     }
-#     api = ServiceOrderAPI(db_config)
-#     api.run()
-
+if __name__ == "__main__":
+    db_config = {
+        'host': 'localhost',
+        'port': 5432,
+        'dbname': 'mydatabase',
+        'user': 'myuser',
+        'password': 'mypassword'
+    }
+    config = {
+    "SERVER_UPDATE_INTERNAL": 5.0,
+    "RANDOM_UPDATE_INTERVAL": 10.0
+    }
+    api = ServiceOrderAPI(db_config, config)
+    api.run()
+    

@@ -47,7 +47,7 @@ class OPCUAServer:
             datatype=ua.NodeId(887, 0)  # 887 = EUInformation, standard type
         )
         
-    def run(self, update_interval=10):
+    def run(self, config={}):
         self.server.start()
         print("OPC UA Server is running in background thread.")
         try:
@@ -59,7 +59,7 @@ class OPCUAServer:
                     vars["discharge_pressure"].set_value(pump.discharge_pressure)
                     vars["power_consumption"].set_value(pump.power_consumption)
                 print("OPCUA存储更新成功")
-                time.sleep(update_interval)
+                time.sleep(config["SERVER_UPDATE_INTERNAL"])
         except KeyboardInterrupt:
             print("shutting down")
         finally:

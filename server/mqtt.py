@@ -22,7 +22,7 @@ class MqttPublisher:
         self.client.disconnect()
         print("MQTT connection stopped")
 
-    def publish_loop(self, update_interval=10):
+    def publish_loop(self, config={}):
         try:
             while True:
                 topic, payload = self.power_aggregator.compute_total_it_load()
@@ -32,13 +32,13 @@ class MqttPublisher:
                     print(f"MQTT成功发布到 {topic}")
                 else:
                     print(f"发布失败，返回码 {result.rc}")
-                time.sleep(update_interval)
+                time.sleep(config["SERVER_UPDATE_INTERNAL"])
         except KeyboardInterrupt:
             print("Publishing stopped by user")
     
-    def start(self, update_interval=10):
+    def start(self, config={}):
         self.connect()
-        self.publish_loop(update_interval=update_interval)
+        self.publish_loop(config=config)
         self.disconnect()
 
 # if __name__ == "__main__":
