@@ -66,25 +66,39 @@
 
 
 
-import paho.mqtt.client as mqtt
+# import paho.mqtt.client as mqtt
 
-def on_connect(client, userdata, flags, rc):
-    if rc == 0:
-        print("连接成功")
-        client.subscribe("IT/DataHall-1/kpi/totalITLoad")
-    else:
-        print(f"连接失败，返回码 {rc}")
+# def on_connect(client, userdata, flags, rc):
+#     if rc == 0:
+#         print("连接成功")
+#         client.subscribe("IT/DataHall-1/kpi/totalITLoad")
+#     else:
+#         print(f"连接失败，返回码 {rc}")
 
-def on_message(client, userdata, msg):
-    print(f"收到消息: topic={msg.topic}, payload={msg.payload.decode()}")
+# def on_message(client, userdata, msg):
+#     print(f"收到消息: topic={msg.topic}, payload={msg.payload.decode()}")
 
-broker = "localhost"
-client = mqtt.Client()
+# broker = "localhost"
+# client = mqtt.Client()
 
-client.on_connect = on_connect
-client.on_message = on_message
+# client.on_connect = on_connect
+# client.on_message = on_message
 
-client.connect(broker, 1883, 60)
+# client.connect(broker, 1883, 60)
 
-client.loop_forever()
+# client.loop_forever()
 
+import requests
+
+url = "http://localhost:5000/api/v1/config"
+
+# 想修改的配置
+payload = {
+    "SERVER_UPDATE_INTERNAL": 0.9,
+    "RANDOM_UPDATE_INTERVAL": 200
+}
+
+response = requests.post(url, json=payload)
+
+print(response.status_code)
+print(response.json())
