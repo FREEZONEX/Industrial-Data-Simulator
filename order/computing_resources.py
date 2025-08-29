@@ -1,15 +1,18 @@
 from flask import Flask, request, jsonify
 import psycopg2
 import json
-# import main
-# from datetime import datetime
-# import paho.mqtt.client as mqtt
-# from simulation import simulation
+
+import sys 
+sys.path.insert(0, sys.path[0]+"/../")
+from instances import simulation_instance
+from celery_tasks import run_simulation, celery
+from celery.result import AsyncResult
 
 class ServiceOrderAPI:
-    def __init__(self, db_config, config):
+    def __init__(self, db_config, config):  # 数据库配置，轮训时间配置，仿真类实例
         self.db_config = db_config
         self.config = config
+        self.latest_task_id = None
         self.app = Flask(__name__)
         self._create_table()
         self._register_routes()
@@ -63,22 +66,33 @@ class ServiceOrderAPI:
                         RETURNING order_id
                     """, (customer_id, json.dumps(requested_resources), duration_months))
                     order_id = cur.fetchone()[0]
+                    simulation_instance.power_allocate(requested_resources)
+                    print(simulation_instance.power_aggregator.compute_total_it_load())
+                    if self.latest_task_id:
+                        previous_task = AsyncResult(self.latest_task_id, app=celery)
+                        # 只有当任务还在执行中才 revoke
+                        if previous_task.state not in ('SUCCESS', 'FAILURE', 'REVOKED'):
+                            previous_task.revoke(terminate=True)
 
-                    # simulation()  # 执行仿真
+                    task = run_simulation.delay()
+                    self.latest_task_id = task.id
 
+            # 仿真开始后更新订单状态
+            with psycopg2.connect(**self.db_config) as conn:
+                with conn.cursor() as cur:
                     cur.execute("""
-                        UPDATE service_orders
-                        SET updated_at = CURRENT_TIMESTAMP,
-                            activated_at = CURRENT_TIMESTAMP,
-                            status = 'Active'
-                        WHERE order_id = %s
-                    """, (order_id,))
-
+                            UPDATE service_orders
+                            SET updated_at = CURRENT_TIMESTAMP,
+                                activated_at = CURRENT_TIMESTAMP,
+                                status = 'Active'
+                            WHERE order_id = %s
+                        """, (order_id,))
+                    
             return jsonify({
                 "order_id": str(order_id),
                 "status": "processing",
                 "message": "Order received and is being processed."
-            }), 201
+            }), 200
         except Exception as e:
             return jsonify({"status": "fail", "error": str(e)}), 500
 
@@ -151,6 +165,7 @@ if __name__ == "__main__":
     "SERVER_UPDATE_INTERNAL": 5.0,
     "RANDOM_UPDATE_INTERVAL": 10.0
     }
+
     api = ServiceOrderAPI(db_config, config)
+
     api.run()
-    

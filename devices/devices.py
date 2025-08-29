@@ -198,12 +198,13 @@ class Rack:
 class Power_aggregator:
     def __init__(self, racks: list[Rack]):
         self.racks = racks
+        self.total = sum(rack.power_draw_kw for rack in self.racks)
 
     def compute_total_it_load(self) -> dict:
         self.total = sum(rack.power_draw_kw for rack in self.racks)
         topic = "IT/DataHall-1/kpi/totalITLoad"
         payload = {
-            "value": round(self.total, 2),
+            "value": self.total,
             "unit": "kW"
         }
         return topic, payload
