@@ -38,7 +38,7 @@ services:
     restart: always
 
   ids:
-    image: supos/ids:latest
+    image: suposce/ids:latest
     container_name: ids
     network_mode: host
     depends_on:
