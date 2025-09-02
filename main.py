@@ -9,8 +9,8 @@ import random
 import time
 
 CONFIG = {
-    "SERVER_UPDATE_INTERNAL": 5.0,
-    "RANDOM_UPDATE_INTERVAL": 10.0
+    "SERVER_UPDATE_INTERNAL": 0.1,
+    "RANDOM_UPDATE_INTERVAL": 0.1
 }
 
 db_config = {
@@ -30,8 +30,9 @@ mqtt_publisher = MqttPublisher(racks, broker=os.getenv("MQTT_BROKER", "localhost
 order_api = ServiceOrderAPI(db_config, CONFIG)
 
 async def main():
+    order_api.subscribe_config()
     opcua_thread = threading.Thread(
-        target=opcua_server.run, 
+        target=opcua_server.run,
         args=(CONFIG,),
         daemon=True)
     opcua_thread.start()
@@ -63,7 +64,7 @@ def random_update(obj, config=CONFIG):
             for key, value in obj.__dict__.items():
                 if isinstance(value, (int, float)):
                 # 随机上下浮动 ±1%
-                    delta = value * 0.01
+                    delta = value * 0.02
                     new_value = value + random.uniform(-delta, delta)
                     obj.update_value(new_value, key)
             print(f"{obj.__class__.__name__} updated")

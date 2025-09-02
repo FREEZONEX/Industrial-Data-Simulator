@@ -9,9 +9,6 @@ celery = Celery(
 
 @celery.task(bind=True)
 def run_simulation(self):
-    """
-    request: list of dicts,每个订单对应的 request
-    """
     try:
         # 执行最新的订单
         simulation_instance.simulate()

@@ -1,6 +1,9 @@
 from flask import Flask, request, jsonify
 import psycopg2
 import json
+import redis
+import json
+import threading
 
 import sys 
 sys.path.insert(0, sys.path[0]+"/../")
@@ -9,13 +12,71 @@ from celery_tasks import run_simulation, celery
 from celery.result import AsyncResult
 
 class ServiceOrderAPI:
-    def __init__(self, db_config, config):  # 数据库配置，轮训时间配置，仿真类实例
+    def __init__(self, db_config, config):  # 数据库配置，轮训时间配置
         self.db_config = db_config
         self.config = config
         self.latest_task_id = None
+        self.r = redis.Redis(host="localhost", port=6379, db=2, decode_responses=True)
         self.app = Flask(__name__)
         self._create_table()
         self._register_routes()
+
+    def _push_config(self):
+        config = {
+            "crah_101": {
+                "return_air_temp": simulation_instance.crah_101.return_air_temp,
+                "supply_air_temp": simulation_instance.crah_101.supply_air_temp,
+                "fan_speed": simulation_instance.crah_101.fan_speed,
+                "chilled_water_valve_position": simulation_instance.crah_101.chilled_water_valve_position
+            },
+            "chiller_201": {
+                "chilled_water_leaving_temp": simulation_instance.chiller_201.chilled_water_leaving_temp,
+                "chilled_water_entering_temp": simulation_instance.chiller_201.chilled_water_entering_temp,
+                "compressor_load": simulation_instance.chiller_201.compressor_load,
+                "total_power_consumption": simulation_instance.chiller_201.total_power_consumption
+            },
+            "ct_301": {
+                "fan_speed": simulation_instance.ct_301.fan_speed,
+                "tower_basin_temp": simulation_instance.ct_301.tower_basin_temp,
+                "entering_water_temp": simulation_instance.ct_301.entering_water_temp
+            },
+            "cdwp_301": {},
+            "chwp_201": {},
+            "power_aggregator": {
+                "total": simulation_instance.power_aggregator.total
+            }
+        }
+        self.r.lpush("simulation_config", json.dumps(config))
+    
+    def subscribe_config(self):
+        def _listener():
+            pubsub = self.r.pubsub()
+            pubsub.subscribe("simulation_step")
+            for message in pubsub.listen():
+                if message['type'] != 'message':
+                    continue
+                try:
+                    data = json.loads(message['data'])                    
+                    # --- 更新 CRAH ---
+                    for k, v in data.get("crah_101", {}).items():
+                        simulation_instance.crah_101.update_value(v, k)
+                    
+                    # --- 更新 Chiller ---
+                    for k, v in data.get("chiller_201", {}).items():
+                        simulation_instance.chiller_201.update_value(v, k)
+                    
+                    # --- 更新 CoolingTower ---
+                    for k, v in data.get("ct_301", {}).items():
+                        simulation_instance.ct_301.update_value(v, k)
+                    
+                    # --- 更新 Power Aggregator ---
+                    for k, v in data.get("power_aggregator", {}).items():
+                        simulation_instance.power_aggregator.update_value(v, k)
+                except Exception as e:
+                    print("Subscribe update fail:", e)
+
+        t = threading.Thread(target=_listener, daemon=True)
+        t.start()
 
     def _create_table(self):
         CREATE_TABLE_SQL = """
@@ -73,7 +134,8 @@ class ServiceOrderAPI:
                         # 只有当任务还在执行中才 revoke
                         if previous_task.state not in ('SUCCESS', 'FAILURE', 'REVOKED'):
                             previous_task.revoke(terminate=True)
-
+                    
+                    self._push_config()
                     task = run_simulation.delay()
                     self.latest_task_id = task.id
 

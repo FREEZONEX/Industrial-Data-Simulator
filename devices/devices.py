@@ -208,7 +208,13 @@ class Power_aggregator:
             "unit": "kW"
         }
         return topic, payload
-
+    
+    def update_value(self, value, key):
+        if hasattr(self, key):
+            setattr(self, key, value)
+        else:
+            raise KeyError(f"No such key: {key}")
+        
 class Runtime:
     def __init__(self, ct301=0, cdwp301=0, chiller201=0, racks=0, chwp201=0, crah101=0):
         self.ct301 = ct301

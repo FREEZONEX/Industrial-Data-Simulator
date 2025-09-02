@@ -16,53 +16,53 @@
 # client.close()
 
 
-# import netifaces
-# import BAC0
-# import asyncio
+import netifaces
+import BAC0
+import asyncio
 
-# def get_local_ip_cidr():
-#     for iface in netifaces.interfaces():
-#         addrs = netifaces.ifaddresses(iface)
-#         if netifaces.AF_INET in addrs:
-#             for addr in addrs[netifaces.AF_INET]:
-#                 ip = addr['addr']
-#                 netmask = addr.get('netmask', '255.255.255.0')
-#                 if ip.startswith("127."):
-#                     continue
-#                 cidr = sum([bin(int(x)).count('1') for x in netmask.split('.')])
-#                 return f"{ip}/{cidr}"
-#     return None
+def get_local_ip_cidr():
+    for iface in netifaces.interfaces():
+        addrs = netifaces.ifaddresses(iface)
+        if netifaces.AF_INET in addrs:
+            for addr in addrs[netifaces.AF_INET]:
+                ip = addr['addr']
+                netmask = addr.get('netmask', '255.255.255.0')
+                if ip.startswith("127."):
+                    continue
+                cidr = sum([bin(int(x)).count('1') for x in netmask.split('.')])
+                return f"{ip}/{cidr}"
+    return None
 
-# async def main():
-#     local_cidr = get_local_ip_cidr()
-#     bacnet = BAC0.connect(ip="192.168.151.134/24:50000")
+async def main():
+    local_cidr = get_local_ip_cidr()
+    bacnet = BAC0.connect(ip="192.168.151.134/24:50000")
 
-#     object_type = 'analogInput'
-#     instance_number = 1
-#     property_name = 'presentValue'
+    object_type = 'analogInput'
+    instance_number = 1
+    property_name = 'presentValue'
 
-#     print("started")
+    print("started")
 
-#     # 写入设备对象属性
-#     new_value = 20.0
-#     # bacnet.write(f'{local_cidr} {object_type} {instance_number} {property_name} {new_value}')
-#     # print("writted")
+    # 写入设备对象属性
+    new_value = 20.0
+    # bacnet.write(f'{local_cidr} {object_type} {instance_number} {property_name} {new_value}')
+    # print("writted")
 
-#     value1 = await bacnet.read(f'192.168.151.134 analogInput 0 presentValue')
-#     value2 = await bacnet.read(f'192.168.151.134 analogInput 1 presentValue')
-#     value3 = await bacnet.read(f'192.168.151.134 analogInput 2 presentValue')
-#     value4 = await bacnet.read(f'192.168.151.134 analogInput 3 presentValue')
-#     value5 = await bacnet.read(f'192.168.151.134 characterstringValue 0 presentValue')
-#     print(f'The present value is: {value1} {value2} {value3} {value4} {value5}')
+    value1 = await bacnet.read(f'192.168.151.134 analogInput 0 presentValue')
+    value2 = await bacnet.read(f'192.168.151.134 analogInput 1 presentValue')
+    value3 = await bacnet.read(f'192.168.151.134 analogInput 2 presentValue')
+    value4 = await bacnet.read(f'192.168.151.134 analogInput 3 presentValue')
+    value5 = await bacnet.read(f'192.168.151.134 characterstringValue 0 presentValue')
+    print(f'The present value is: {value1} {value2} {value3} {value4} {value5}')
 
-#     # 等待一会确保写操作完成
-#     await asyncio.sleep(1)
+    # 等待一会确保写操作完成
+    await asyncio.sleep(1)
 
-#     # 断开连接
-#     bacnet.disconnect()
+    # 断开连接
+    bacnet.disconnect()
 
-# if __name__ == "__main__":
-#     asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
 
 
 
@@ -88,17 +88,24 @@
 
 # client.loop_forever()
 
-import requests
+# import requests
 
-url = "http://localhost:5000/api/v1/config"
+# url = "http://localhost:5000/api/v1/config"
 
-# 想修改的配置
-payload = {
-    "SERVER_UPDATE_INTERNAL": 0.9,
-    "RANDOM_UPDATE_INTERVAL": 200
-}
+# # 想修改的配置
+# payload = {
+#     "SERVER_UPDATE_INTERNAL": 0.9,
+#     "RANDOM_UPDATE_INTERVAL": 200
+# }
 
-response = requests.post(url, json=payload)
+# response = requests.post(url, json=payload)
 
-print(response.status_code)
-print(response.json())
+# print(response.status_code)
+# print(response.json())
+
+# from celery_tasks import run_simulation
+
+# task = run_simulation.delay(["11111111-1111-1111-1111-111111111111"],
+#                             [{"cpu_cores": 4, "memory_gb": 16, "storage_tb": 2}])
+# print("Task ID:", task.id)
+
