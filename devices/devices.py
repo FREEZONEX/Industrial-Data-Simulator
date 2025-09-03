@@ -202,12 +202,11 @@ class Power_aggregator:
 
     def compute_total_it_load(self) -> dict:
         self.total = sum(rack.power_draw_kw for rack in self.racks)
-        topic = "IT/DataHall-1/kpi/totalITLoad"
         payload = {
             "value": self.total,
             "unit": "kW"
         }
-        return topic, payload
+        return payload
     
     def update_value(self, value, key):
         if hasattr(self, key):
