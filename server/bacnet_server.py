@@ -34,7 +34,7 @@ class BacnetServer:
                 dev["supply_air_temp"].presentValue = self.crah.get_value("supply_air_temp")
                 dev["chilled_water_valve_position"].presentValue = self.crah.get_value("chilled_water_valve_position")
                 dev["fan_speed"].presentValue = self.crah.get_value("fan_speed")
-                print("更新BACnet点值")
+                # print("更新BACnet点值")
                 await asyncio.sleep(self.config["SERVER_UPDATE_INTERNAL"])
             
     async def start(self):

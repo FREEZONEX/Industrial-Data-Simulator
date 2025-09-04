@@ -29,7 +29,7 @@ class ModbusServer:
         while True:
             self.ct301.store_all(self.context, 1)
             self.chiller201.store_all(self.context, 2)
-            print("Modbus_Slave Context Updated.")
+            # print("Modbus_Slave Context Updated.")
             await asyncio.sleep(self.config["SERVER_UPDATE_INTERNAL"])
 
     async def start(self):

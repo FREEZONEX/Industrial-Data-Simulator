@@ -60,7 +60,8 @@ class MqttPublisher:
         payload_str = json.dumps(payload)
         result = self.client.publish(self.total_topic, payload_str)
         if result.rc == 0:
-            print(f"MQTT成功发布总功率数据到 {self.total_topic}")
+            pass
+            # print(f"MQTT成功发布总功率数据到 {self.total_topic}")
         else:
             print(f"总功率发布失败，返回码 {result.rc}")
 
