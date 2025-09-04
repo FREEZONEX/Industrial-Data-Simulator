@@ -26,7 +26,7 @@ modbus_server = ModbusServer(ct_301, chiller_201, address=("0.0.0.0", 5020), con
 opcua_server = OPCUAServer(endpoint="opc.tcp://0.0.0.0:4840/")
 opcua_server.add_pump("CDWP-301", cdwp_301)
 opcua_server.add_pump("CHWP-201", chwp_201)
-mqtt_publisher = MqttPublisher(racks, broker=os.getenv("MQTT_BROKER", "localhost"), port=int(os.getenv("MQTT_PORT", 1883)), keepalive=60)
+mqtt_publisher = MqttPublisher(racks, broker="localhost", port=1883, keepalive=60)
 order_api = ServiceOrderAPI(db_config, CONFIG, mqtt_publisher)
 
 async def main():
