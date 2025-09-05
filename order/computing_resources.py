@@ -234,19 +234,19 @@ class ServiceOrderAPI:
         self.app.run(host=host, port=port, debug=debug)
 
 
-if __name__ == "__main__":
-    db_config = {
-        'host': 'localhost',
-        'port': 5432,
-        'dbname': 'mydatabase',
-        'user': 'myuser',
-        'password': 'mypassword'
-    }
-    config = {
-    "SERVER_UPDATE_INTERNAL": 5.0,
-    "RANDOM_UPDATE_INTERVAL": 10.0
-    }
+# if __name__ == "__main__":
+#     db_config = {
+#         'host': 'localhost',
+#         'port': 5432,
+#         'dbname': 'mydatabase',
+#         'user': 'myuser',
+#         'password': 'mypassword'
+#     }
+#     config = {
+#     "SERVER_UPDATE_INTERNAL": 5.0,
+#     "RANDOM_UPDATE_INTERVAL": 10.0
+#     }
 
-    api = ServiceOrderAPI(db_config, config)
+#     api = ServiceOrderAPI(db_config, config)
 
-    api.run()
+#     api.run()
