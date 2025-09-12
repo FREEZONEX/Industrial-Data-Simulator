@@ -58,7 +58,7 @@ class OPCUAServer:
                     vars["flow_rate"].set_value(pump.flow_rate)
                     vars["discharge_pressure"].set_value(pump.discharge_pressure)
                     vars["power_consumption"].set_value(pump.power_consumption)
-                print("OPCUA存储更新成功")
+                # print("OPCUA存储更新成功")
                 time.sleep(config["SERVER_UPDATE_INTERNAL"])
         except KeyboardInterrupt:
             print("shutting down")

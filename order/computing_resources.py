@@ -12,9 +12,10 @@ from celery_tasks import run_simulation, celery
 from celery.result import AsyncResult
 
 class ServiceOrderAPI:
-    def __init__(self, db_config, config):  # 数据库配置，轮训时间配置
+    def __init__(self, db_config, config, mqtt_publisher):  # 数据库配置，轮训时间配置
         self.db_config = db_config
         self.config = config
+        self.mqtt_publisher = mqtt_publisher
         self.latest_task_id = None
         self.r = redis.Redis(host="localhost", port=6379, db=2, decode_responses=True)
         self.app = Flask(__name__)
@@ -112,6 +113,10 @@ class ServiceOrderAPI:
         @self.app.route("/api/v1/config", methods=["POST"])
         def update_config():
             return self.update_config(request.json)
+        
+        @self.app.route("/api/v1/mqtt", methods=["POST"])
+        def update_mqtt():
+            return self.update_mqtt(request.json)
 
     def create_order(self, data):
         customer_id = data.get("customer_id")
@@ -211,23 +216,37 @@ class ServiceOrderAPI:
 
         return jsonify({"status": "ok", "updated": response}), 200
 
+    def update_mqtt(self, data):
+        broker = data.get("broker")
+        port = data.get("port", 1883)
+        if not broker:
+            return jsonify({"error": "broker is required"}), 400
+        
+        try:
+            self.mqtt_publisher.disconnect()
+            self.mqtt_publisher.update_broker(broker, port)
+            self.mqtt_publisher._reconnect()
+            return jsonify({"message": f"MQTT broker updated to {broker}:{port}"})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+    
     def run(self, host="0.0.0.0", port=5000, debug=True):
         self.app.run(host=host, port=port, debug=debug)
 
 
-if __name__ == "__main__":
-    db_config = {
-        'host': 'localhost',
-        'port': 5432,
-        'dbname': 'mydatabase',
-        'user': 'myuser',
-        'password': 'mypassword'
-    }
-    config = {
-    "SERVER_UPDATE_INTERNAL": 5.0,
-    "RANDOM_UPDATE_INTERVAL": 10.0
-    }
+# if __name__ == "__main__":
+#     db_config = {
+#         'host': 'localhost',
+#         'port': 5432,
+#         'dbname': 'mydatabase',
+#         'user': 'myuser',
+#         'password': 'mypassword'
+#     }
+#     config = {
+#     "SERVER_UPDATE_INTERNAL": 5.0,
+#     "RANDOM_UPDATE_INTERVAL": 10.0
+#     }
 
-    api = ServiceOrderAPI(db_config, config)
+#     api = ServiceOrderAPI(db_config, config)
 
-    api.run()
+#     api.run()

@@ -9,8 +9,8 @@ import random
 import time
 
 CONFIG = {
-    "SERVER_UPDATE_INTERNAL": 0.1,
-    "RANDOM_UPDATE_INTERVAL": 0.1
+    "SERVER_UPDATE_INTERNAL": 5,
+    "RANDOM_UPDATE_INTERVAL": 5
 }
 
 db_config = {
@@ -26,8 +26,8 @@ modbus_server = ModbusServer(ct_301, chiller_201, address=("0.0.0.0", 5020), con
 opcua_server = OPCUAServer(endpoint="opc.tcp://0.0.0.0:4840/")
 opcua_server.add_pump("CDWP-301", cdwp_301)
 opcua_server.add_pump("CHWP-201", chwp_201)
-mqtt_publisher = MqttPublisher(racks, broker=os.getenv("MQTT_BROKER", "localhost"), port=int(os.getenv("MQTT_PORT", 1883)), keepalive=60)
-order_api = ServiceOrderAPI(db_config, CONFIG)
+mqtt_publisher = MqttPublisher(racks, broker="localhost", port=1883, keepalive=60)
+order_api = ServiceOrderAPI(db_config, CONFIG, mqtt_publisher)
 
 async def main():
     order_api.subscribe_config()
@@ -63,11 +63,11 @@ def random_update(obj, config=CONFIG):
         while True:
             for key, value in obj.__dict__.items():
                 if isinstance(value, (int, float)):
-                # 随机上下浮动 ±1%
+                # 随机上下浮动 ±2%
                     delta = value * 0.02
                     new_value = value + random.uniform(-delta, delta)
                     obj.update_value(new_value, key)
-            print(f"{obj.__class__.__name__} updated")
+            # print(f"{obj.__class__.__name__} updated")
             time.sleep(config["RANDOM_UPDATE_INTERVAL"])
     
     t =threading.Thread(target=updater, daemon=True)

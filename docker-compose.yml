@@ -48,7 +48,7 @@ services:
     restart: unless-stopped
 
   worker:
-    build: .
+    image: suposce/ids:latest
     container_name: worker
     network_mode: host
     command: celery -A celery_tasks worker --loglevel=info
