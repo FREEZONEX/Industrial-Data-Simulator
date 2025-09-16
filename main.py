@@ -67,7 +67,7 @@ def random_update(obj, config=CONFIG):
                     delta = value * 0.02
                     new_value = value + random.uniform(-delta, delta)
                     obj.update_value(new_value, key)
-            # print(f"{obj.__class__.__name__} updated")
+            print(f"{obj.__class__.__name__} updated")
             time.sleep(config["RANDOM_UPDATE_INTERVAL"])
     
     t =threading.Thread(target=updater, daemon=True)
