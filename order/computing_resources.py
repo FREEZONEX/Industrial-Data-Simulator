@@ -1,8 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 import psycopg2
 import json
 import redis
 import json
+import os
 import threading
 
 import sys 
@@ -12,13 +14,16 @@ from celery_tasks import run_simulation, celery
 from celery.result import AsyncResult
 
 class ServiceOrderAPI:
-    def __init__(self, db_config, config, mqtt_publisher):  # 数据库配置，轮训时间配置
+    def __init__(self, db_config, config, mqtt_publisher=None):  # 数据库配置，轮训时间配置
         self.db_config = db_config
         self.config = config
         self.mqtt_publisher = mqtt_publisher
         self.latest_task_id = None
         self.r = redis.Redis(host="localhost", port=6379, db=2, decode_responses=True)
-        self.app = Flask(__name__)
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        self.BUILD_DIR = os.path.join(BASE_DIR, "build")
+        self.app = Flask(__name__, static_folder=self.BUILD_DIR, static_url_path="")
+        CORS(self.app)
         self._create_table()
         self._register_routes()
 
@@ -117,6 +122,17 @@ class ServiceOrderAPI:
         @self.app.route("/api/v1/mqtt", methods=["POST"])
         def update_mqtt():
             return self.update_mqtt(request.json)
+        
+        # 静态文件路由（React build）
+        @self.app.route("/", defaults={"path": ""})
+        @self.app.route("/<path:path>")
+        def serve_react(path):
+            # 如果是静态文件则返回它
+            if path != "" and os.path.exists(os.path.join(self.BUILD_DIR, path)):
+                return send_from_directory(self.BUILD_DIR, path)
+            else:
+                # 否则返回 index.html（React 前端路由）
+                return send_from_directory(self.BUILD_DIR, "index.html")
 
     def create_order(self, data):
         customer_id = data.get("customer_id")
@@ -230,7 +246,7 @@ class ServiceOrderAPI:
         except Exception as e:
             return jsonify({"error": str(e)}), 500
     
-    def run(self, host="0.0.0.0", port=5000, debug=True):
+    def run(self, host="0.0.0.0", port=5000, debug=False):
         self.app.run(host=host, port=port, debug=debug)
 
 
