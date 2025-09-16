@@ -134,7 +134,6 @@ class Simulation:
                     "total": self.power_aggregator.total
                 }
             }
-            print(config)
             self.mq.publish("simulation_step", json.dumps(config))
             yield env.timeout(self.TIME_STEP)
             time.sleep(self.TIME_STEP)
