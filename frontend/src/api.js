@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "/api/v1", // Flask接口
+  baseURL: "http://192.168.151.136:5000/api/v1", // Flask接口
 });
 
 // 创建订单
