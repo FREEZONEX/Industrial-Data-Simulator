@@ -27,31 +27,49 @@ class ServiceOrderAPI:
         self._create_table()
         self._register_routes()
 
-    def _push_config(self):
-        config = {
-            "crah_101": {
-                "return_air_temp": simulation_instance.crah_101.return_air_temp,
-                "supply_air_temp": simulation_instance.crah_101.supply_air_temp,
-                "fan_speed": simulation_instance.crah_101.fan_speed,
-                "chilled_water_valve_position": simulation_instance.crah_101.chilled_water_valve_position
-            },
-            "chiller_201": {
-                "chilled_water_leaving_temp": simulation_instance.chiller_201.chilled_water_leaving_temp,
-                "chilled_water_entering_temp": simulation_instance.chiller_201.chilled_water_entering_temp,
-                "compressor_load": simulation_instance.chiller_201.compressor_load,
-                "total_power_consumption": simulation_instance.chiller_201.total_power_consumption
-            },
-            "ct_301": {
-                "fan_speed": simulation_instance.ct_301.fan_speed,
-                "tower_basin_temp": simulation_instance.ct_301.tower_basin_temp,
-                "entering_water_temp": simulation_instance.ct_301.entering_water_temp
-            },
-            "cdwp_301": {},
-            "chwp_201": {},
-            "power_aggregator": {
-                "total": simulation_instance.power_aggregator.total
+    def _get_data(self):
+        data = {
+                "crah_101": {
+                    "return_air_temp": simulation_instance.crah_101.return_air_temp,
+                    "supply_air_temp": simulation_instance.crah_101.supply_air_temp,
+                    "fan_speed": simulation_instance.crah_101.fan_speed,
+                    "chilled_water_valve_position": simulation_instance.crah_101.chilled_water_valve_position
+                },
+                "chiller_201": {
+                    "condenser_entering_water_temp": simulation_instance.chiller_201.condenser_entering_water_temp,
+                    "condenser_leaving_water_temp": simulation_instance.chiller_201.condenser_leaving_water_temp,
+                    "chilled_water_leaving_temp": simulation_instance.chiller_201.chilled_water_leaving_temp,
+                    "chilled_water_entering_temp": simulation_instance.chiller_201.chilled_water_entering_temp,
+                    "compressor_load": simulation_instance.chiller_201.compressor_load,
+                    "refrigerant_condensing_pressure": simulation_instance.chiller_201.refrigerant_condensing_pressure,
+                    "refrigerant_evaporating_pressure": simulation_instance.chiller_201.refrigerant_evaporating_pressure,
+                    "total_power_consumption": simulation_instance.chiller_201.total_power_consumption
+                },
+                "ct_301": {
+                    "fan_speed": simulation_instance.ct_301.fan_speed,
+                    "tower_top_air_temp": simulation_instance.ct_301.tower_top_air_temp,
+                    "tower_basin_temp": simulation_instance.ct_301.tower_basin_temp,
+                    "entering_water_temp": simulation_instance.ct_301.entering_water_temp,
+                    "basin_water_level": simulation_instance.ct_301.basin_water_level
+                },
+                "cdwp_301": {
+                    "flow_rate":simulation_instance.cdwp_301.flow_rate,
+                    "discharge_pressure": simulation_instance.cdwp_301.discharge_pressure,
+                    "power_consumption": simulation_instance.cdwp_301.power_consumption,
+                },
+                "chwp_201": {
+                    "flow_rate":simulation_instance.chwp_201.flow_rate,
+                    "discharge_pressure": simulation_instance.chwp_201.discharge_pressure,
+                    "power_consumption": simulation_instance.chwp_201.power_consumption,
+                },
+                "power_aggregator": {
+                    "total": simulation_instance.power_aggregator.total
+                }
             }
-        }
+        return data
+    
+    def _push_config(self):
+        config = self._get_data()
         self.r.lpush("simulation_config", json.dumps(config))
     
     def subscribe_config(self):
@@ -62,7 +80,7 @@ class ServiceOrderAPI:
                 if message['type'] != 'message':
                     continue
                 try:
-                    data = json.loads(message['data'])                    
+                    data = json.loads(message['data'])                   
                     # --- 更新 CRAH ---
                     for k, v in data.get("crah_101", {}).items():
                         simulation_instance.crah_101.update_value(v, k)
@@ -74,6 +92,13 @@ class ServiceOrderAPI:
                     # --- 更新 CoolingTower ---
                     for k, v in data.get("ct_301", {}).items():
                         simulation_instance.ct_301.update_value(v, k)
+
+                    # --- 更新 PUMP ---
+                    for k, v in data.get("cdwp_301", {}).items():
+                        simulation_instance.cdwp_301.update_value(v, k)
+
+                    for k, v in data.get("chwp_201", {}).items():
+                        simulation_instance.chwp_201.update_value(v, k)
                     
                     # --- 更新 Power Aggregator ---
                     for k, v in data.get("power_aggregator", {}).items():
@@ -115,6 +140,10 @@ class ServiceOrderAPI:
         def list_order():
             return self.list_order(request.args)
         
+        @self.app.route("/api/v1/dashboard", methods=["GET"])
+        def list_data():
+            return self.list_data()
+
         @self.app.route("/api/v1/config", methods=["POST"])
         def update_config():
             return self.update_config(request.json)
@@ -220,7 +249,14 @@ class ServiceOrderAPI:
             return jsonify(result), 200
         except Exception as e:
             return jsonify({"status": "fail", "error": str(e)}), 500
-        
+
+    def list_data(self):
+        data = self._get_data()
+        for i in range(6):
+            rack_key = f"RACK-A0{i+1}"
+            data[rack_key] = {"power": simulation_instance.racks[i].power_draw_kw}
+        return jsonify(data)
+
     def update_config(self, data):
         response = {}
         if "SERVER_UPDATE_INTERNAL" in data:

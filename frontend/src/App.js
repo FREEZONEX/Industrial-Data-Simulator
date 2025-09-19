@@ -7,12 +7,14 @@ import {
   PlusOutlined,
   SettingOutlined,
   CloudServerOutlined,
+  AreaChartOutlined
 } from "@ant-design/icons";
 
 import CreateOrder from "./components/CreateOrder";
 import OrderList from "./components/OrderList";
 import ConfigForm from "./components/ConfigForm";
 import MqttForm from "./components/MqttForm";
+import Dashboard from "./components/Dashboard";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { Title } = Typography;
@@ -47,6 +49,11 @@ const NavigationMenu = () => {
           key: "/mqtt",
           icon: <CloudServerOutlined />,
           label: <Link to="/mqtt">MQTT</Link>,
+        },
+        {
+          key: "/dashboard",
+          icon: <AreaChartOutlined />,
+          label: <Link to="/dashboard">仪表盘</Link>,
         },
       ]}
     />
@@ -98,6 +105,7 @@ function App() {
                 <Route path="/create" element={<CreateOrder />} />
                 <Route path="/config" element={<ConfigForm />} />
                 <Route path="/mqtt" element={<MqttForm />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/" element={<OrderList />} />
               </Routes>
             </div>

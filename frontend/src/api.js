@@ -1,8 +1,11 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://192.168.151.136:5000/api/v1", // Flask接口
+  baseURL: "/api/v1", // Flask接口
 });
+
+// 获取仪表盘数据
+export const getDashboardData = () => api.get("/dashboard")
 
 // 创建订单
 export const createOrder = (data) => api.post("/orders", data);
