@@ -45,6 +45,7 @@ services:
       - postgres
       - emqx
       - redis
+      - worker
     restart: unless-stopped
 
   worker:
@@ -54,8 +55,6 @@ services:
     command: celery -A celery_tasks worker --loglevel=info
     depends_on:
       - redis
-      - postgres
-      - emqx
     restart: unless-stopped
 
 volumes:
