@@ -22,7 +22,7 @@ class ServiceOrderAPI:
         self.r = redis.Redis(host="localhost", port=6379, db=2, decode_responses=True)
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         self.BUILD_DIR = os.path.join(BASE_DIR, "build")
-        self.app = Flask(__name__, static_folder=self.BUILD_DIR, static_url_path="")
+        self.app = Flask(__name__, static_folder=None)
         CORS(self.app)
         self._create_table()
         self._register_routes()
@@ -132,6 +132,11 @@ class ServiceOrderAPI:
             print(f"Failed to create table: {e}")
 
     def _register_routes(self):
+
+        # @self.app.before_request
+        # def log_all():
+        #     print("Incoming request:", request.path)
+
         @self.app.route("/api/v1/orders", methods=["POST"])
         def create_order():
             return self.create_order(request.json)
@@ -157,11 +162,15 @@ class ServiceOrderAPI:
         @self.app.route("/<path:path>")
         def serve_react(path):
             # 如果是静态文件则返回它
-            if path != "" and os.path.exists(os.path.join(self.BUILD_DIR, path)):
+            full_path = os.path.join(self.BUILD_DIR, path)
+            # print(f"[serve_react] path={path}, full_path={full_path}, exists={os.path.exists(full_path)}")
+            if path != "" and os.path.exists(full_path):
                 return send_from_directory(self.BUILD_DIR, path)
             else:
                 # 否则返回 index.html（React 前端路由）
                 return send_from_directory(self.BUILD_DIR, "index.html")
+
+        # print("Flask URL Map:", self.app.url_map)
 
     def create_order(self, data):
         customer_id = data.get("customer_id")
