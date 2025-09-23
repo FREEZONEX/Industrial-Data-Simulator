@@ -51,6 +51,7 @@ function OrderList() {
       <List
         grid={{ gutter: 16, column: 1 }}
         dataSource={orders}
+        pagination={{ pageSize: 5 }}
         renderItem={(o) => (
           <List.Item>
             <Card>
