@@ -6,6 +6,7 @@ A versatile industrial data source simulator for UNS. Emulates OPC UA, Modbus, R
 ```bash
 docker-compose up -d
 ```
+前台管理界面访问 http://localhost:5000 
 ## 📈 数据变化  
 
 数据变化由 **波动** 和 **模拟** 两部分组成：  
@@ -38,11 +39,8 @@ docker-compose up -d
 ---
 
 ### 2. 查询历史订单
-
 **Endpoint:** `GET /api/v1/orders`  
-
 **描述:** 查询历史计算资源租用订单。  
-
 **查询参数 (Query Parameters):**  
 - `customer_id` (string, optional)：按客户 ID 筛选  
 - `status` (string, optional)：按订单状态筛选 (e.g., `'Active'`, `'Completed'`, `'Processing'`)  
@@ -52,11 +50,8 @@ docker-compose up -d
 ---
 
 ### 3. 更新数据变化速率
-
 **Endpoint:** `POST /api/v1/config`  
-
 **描述:** 更新数据模拟与波动的速率。  
-
 **请求体 (Request Body, application/json):**  
 ```json
 {
@@ -67,8 +62,8 @@ docker-compose up -d
 
 ### 4. MQTT Broker选择
 **Endpoint:** `POST /api/v1/mqtt`  
-**描述:** 支持mqtt设备选择broker。
-**请求体 (Request Body): application/json**
+**描述:** 支持mqtt设备选择broker。  
+**请求体 (Request Body): application/json**  
 ```json
 {
     "broker": "string",
@@ -76,6 +71,12 @@ docker-compose up -d
 }
 ```
 
+### 5. 查询当前数据
+**Endpoint:** `POST /api/v1/dashboard`  
+**描述:** 查询当前所有数据点的值。  
+**查询参数 (Query Parameters):** 无  
+**成功响应:** `200 OK`  
+  
 ## 📡 支持协议与映射  
 
 ### 🔹 Modbus TCP (`localhost:5020`)  
