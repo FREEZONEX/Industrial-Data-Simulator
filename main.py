@@ -60,29 +60,28 @@ async def main():
     order_api_thread.start()
 
     devices = [cdwp_301, chwp_201, ct_301, chiller_201, crah_101] + racks
-    for dev in devices:
-        random_update(dev, config=CONFIG)
+    manager_thread = threading.Thread(
+        target=fluctuation_manager,
+        args=(devices, CONFIG),
+        daemon=True
+    )
+    manager_thread.start()
 
     await asyncio.gather(
         bacnet_device.start(),
         modbus_server.start()
     )
 
-def random_update(obj, config=CONFIG):
-    def updater():
-        while True:
-            for key, value in obj.__dict__.items():
+def fluctuation_manager(devices, config=CONFIG):
+    while True:
+        order_api.apply_config()  # 一次性应用所有配置
+        for dev in devices:
+            for key, value in dev.__dict__.items():
                 if isinstance(value, (int, float)):
-                # 随机上下浮动 ±2%
                     delta = value * 0.02
                     new_value = value + random.uniform(-delta, delta)
-                    obj.update_value(new_value, key)
-            # print(f"{obj.__class__.__name__} updated")
-            time.sleep(config["RANDOM_UPDATE_INTERVAL"])
-    
-    t =threading.Thread(target=updater, daemon=True)
-    t.start()
-    return t
+                    dev.update_value(new_value, key)
+        time.sleep(config["RANDOM_UPDATE_INTERVAL"])
 
 def clean_all():
     if order_api.latest_task_id:

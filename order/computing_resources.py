@@ -26,6 +26,7 @@ class ServiceOrderAPI:
         CORS(self.app)
         self._create_table()
         self._register_routes()
+        self.tmp_config = {}
 
     def _get_data(self):
         data = {
@@ -80,34 +81,36 @@ class ServiceOrderAPI:
                 if message['type'] != 'message':
                     continue
                 try:
-                    data = json.loads(message['data'])                   
-                    # --- 更新 CRAH ---
-                    for k, v in data.get("crah_101", {}).items():
-                        simulation_instance.crah_101.update_value(v, k)
-                    
-                    # --- 更新 Chiller ---
-                    for k, v in data.get("chiller_201", {}).items():
-                        simulation_instance.chiller_201.update_value(v, k)
-                    
-                    # --- 更新 CoolingTower ---
-                    for k, v in data.get("ct_301", {}).items():
-                        simulation_instance.ct_301.update_value(v, k)
-
-                    # --- 更新 PUMP ---
-                    for k, v in data.get("cdwp_301", {}).items():
-                        simulation_instance.cdwp_301.update_value(v, k)
-
-                    for k, v in data.get("chwp_201", {}).items():
-                        simulation_instance.chwp_201.update_value(v, k)
-                    
-                    # --- 更新 Power Aggregator ---
-                    for k, v in data.get("power_aggregator", {}).items():
-                        simulation_instance.power_aggregator.update_value(v, k)
+                    data = json.loads(message['data'])
+                    self.tmp_config = data
                 except Exception as e:
                     print("Subscribe update fail:", e)
 
         t = threading.Thread(target=_listener, daemon=True)
         t.start()
+
+    def apply_config(self):
+        """Call this manually to push tmp_config to simulation_instance."""
+        data = self.tmp_config
+        if not data:
+            return
+        # --- 更新 CRAH ---
+        for k, v in data.get("crah_101", {}).items():
+            simulation_instance.crah_101.update_value(v, k)
+        # --- 更新 Chiller ---
+        for k, v in data.get("chiller_201", {}).items():
+            simulation_instance.chiller_201.update_value(v, k)
+        # --- CoolingTower ---
+        for k, v in data.get("ct_301", {}).items():
+            simulation_instance.ct_301.update_value(v, k)
+        # --- Pump ---
+        for k, v in data.get("cdwp_301", {}).items():
+            simulation_instance.cdwp_301.update_value(v, k)
+        for k, v in data.get("chwp_201", {}).items():
+            simulation_instance.chwp_201.update_value(v, k)
+        # --- Power Aggregator ---
+        for k, v in data.get("power_aggregator", {}).items():
+            simulation_instance.power_aggregator.update_value(v, k)
 
     def _create_table(self):
         CREATE_TABLE_SQL = """
