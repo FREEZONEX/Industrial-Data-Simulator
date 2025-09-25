@@ -1,6 +1,8 @@
+APScheduler==3.11.0
 bac0==2025.8.9
 celery==5.5.3
 Flask==3.1.2
+flask_cors==6.0.1
 opcua==0.98.13
 paho_mqtt==2.1.0
 psycopg2_binary==2.9.10

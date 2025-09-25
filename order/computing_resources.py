@@ -1,8 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 import psycopg2
 import json
 import redis
 import json
+import os
 import threading
 
 import sys 
@@ -12,41 +14,63 @@ from celery_tasks import run_simulation, celery
 from celery.result import AsyncResult
 
 class ServiceOrderAPI:
-    def __init__(self, db_config, config, mqtt_publisher):  # 数据库配置，轮训时间配置
+    def __init__(self, db_config, config, mqtt_publisher=None):  # 数据库配置，轮训时间配置
         self.db_config = db_config
         self.config = config
         self.mqtt_publisher = mqtt_publisher
         self.latest_task_id = None
         self.r = redis.Redis(host="localhost", port=6379, db=2, decode_responses=True)
-        self.app = Flask(__name__)
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        self.BUILD_DIR = os.path.join(BASE_DIR, "build")
+        self.app = Flask(__name__, static_folder=None)
+        CORS(self.app)
         self._create_table()
         self._register_routes()
+        self.tmp_config = {}
 
-    def _push_config(self):
-        config = {
-            "crah_101": {
-                "return_air_temp": simulation_instance.crah_101.return_air_temp,
-                "supply_air_temp": simulation_instance.crah_101.supply_air_temp,
-                "fan_speed": simulation_instance.crah_101.fan_speed,
-                "chilled_water_valve_position": simulation_instance.crah_101.chilled_water_valve_position
-            },
-            "chiller_201": {
-                "chilled_water_leaving_temp": simulation_instance.chiller_201.chilled_water_leaving_temp,
-                "chilled_water_entering_temp": simulation_instance.chiller_201.chilled_water_entering_temp,
-                "compressor_load": simulation_instance.chiller_201.compressor_load,
-                "total_power_consumption": simulation_instance.chiller_201.total_power_consumption
-            },
-            "ct_301": {
-                "fan_speed": simulation_instance.ct_301.fan_speed,
-                "tower_basin_temp": simulation_instance.ct_301.tower_basin_temp,
-                "entering_water_temp": simulation_instance.ct_301.entering_water_temp
-            },
-            "cdwp_301": {},
-            "chwp_201": {},
-            "power_aggregator": {
-                "total": simulation_instance.power_aggregator.total
+    def _get_data(self):
+        data = {
+                "crah_101": {
+                    "return_air_temp": simulation_instance.crah_101.return_air_temp,
+                    "supply_air_temp": simulation_instance.crah_101.supply_air_temp,
+                    "fan_speed": simulation_instance.crah_101.fan_speed,
+                    "chilled_water_valve_position": simulation_instance.crah_101.chilled_water_valve_position
+                },
+                "chiller_201": {
+                    "condenser_entering_water_temp": simulation_instance.chiller_201.condenser_entering_water_temp,
+                    "condenser_leaving_water_temp": simulation_instance.chiller_201.condenser_leaving_water_temp,
+                    "chilled_water_leaving_temp": simulation_instance.chiller_201.chilled_water_leaving_temp,
+                    "chilled_water_entering_temp": simulation_instance.chiller_201.chilled_water_entering_temp,
+                    "compressor_load": simulation_instance.chiller_201.compressor_load,
+                    "refrigerant_condensing_pressure": simulation_instance.chiller_201.refrigerant_condensing_pressure,
+                    "refrigerant_evaporating_pressure": simulation_instance.chiller_201.refrigerant_evaporating_pressure,
+                    "total_power_consumption": simulation_instance.chiller_201.total_power_consumption
+                },
+                "ct_301": {
+                    "fan_speed": simulation_instance.ct_301.fan_speed,
+                    "tower_top_air_temp": simulation_instance.ct_301.tower_top_air_temp,
+                    "tower_basin_temp": simulation_instance.ct_301.tower_basin_temp,
+                    "entering_water_temp": simulation_instance.ct_301.entering_water_temp,
+                    "basin_water_level": simulation_instance.ct_301.basin_water_level
+                },
+                "cdwp_301": {
+                    "flow_rate":simulation_instance.cdwp_301.flow_rate,
+                    "discharge_pressure": simulation_instance.cdwp_301.discharge_pressure,
+                    "power_consumption": simulation_instance.cdwp_301.power_consumption,
+                },
+                "chwp_201": {
+                    "flow_rate":simulation_instance.chwp_201.flow_rate,
+                    "discharge_pressure": simulation_instance.chwp_201.discharge_pressure,
+                    "power_consumption": simulation_instance.chwp_201.power_consumption,
+                },
+                "power_aggregator": {
+                    "total": simulation_instance.power_aggregator.total
+                }
             }
-        }
+        return data
+    
+    def _push_config(self):
+        config = self._get_data()
         self.r.lpush("simulation_config", json.dumps(config))
     
     def subscribe_config(self):
@@ -57,27 +81,36 @@ class ServiceOrderAPI:
                 if message['type'] != 'message':
                     continue
                 try:
-                    data = json.loads(message['data'])                    
-                    # --- 更新 CRAH ---
-                    for k, v in data.get("crah_101", {}).items():
-                        simulation_instance.crah_101.update_value(v, k)
-                    
-                    # --- 更新 Chiller ---
-                    for k, v in data.get("chiller_201", {}).items():
-                        simulation_instance.chiller_201.update_value(v, k)
-                    
-                    # --- 更新 CoolingTower ---
-                    for k, v in data.get("ct_301", {}).items():
-                        simulation_instance.ct_301.update_value(v, k)
-                    
-                    # --- 更新 Power Aggregator ---
-                    for k, v in data.get("power_aggregator", {}).items():
-                        simulation_instance.power_aggregator.update_value(v, k)
+                    data = json.loads(message['data'])
+                    self.tmp_config = data
                 except Exception as e:
                     print("Subscribe update fail:", e)
 
         t = threading.Thread(target=_listener, daemon=True)
         t.start()
+
+    def apply_config(self):
+        """Call this manually to push tmp_config to simulation_instance."""
+        data = self.tmp_config
+        if not data:
+            return
+        # --- 更新 CRAH ---
+        for k, v in data.get("crah_101", {}).items():
+            simulation_instance.crah_101.update_value(v, k)
+        # --- 更新 Chiller ---
+        for k, v in data.get("chiller_201", {}).items():
+            simulation_instance.chiller_201.update_value(v, k)
+        # --- CoolingTower ---
+        for k, v in data.get("ct_301", {}).items():
+            simulation_instance.ct_301.update_value(v, k)
+        # --- Pump ---
+        for k, v in data.get("cdwp_301", {}).items():
+            simulation_instance.cdwp_301.update_value(v, k)
+        for k, v in data.get("chwp_201", {}).items():
+            simulation_instance.chwp_201.update_value(v, k)
+        # --- Power Aggregator ---
+        for k, v in data.get("power_aggregator", {}).items():
+            simulation_instance.power_aggregator.update_value(v, k)
 
     def _create_table(self):
         CREATE_TABLE_SQL = """
@@ -102,6 +135,11 @@ class ServiceOrderAPI:
             print(f"Failed to create table: {e}")
 
     def _register_routes(self):
+
+        # @self.app.before_request
+        # def log_all():
+        #     print("Incoming request:", request.path)
+
         @self.app.route("/api/v1/orders", methods=["POST"])
         def create_order():
             return self.create_order(request.json)
@@ -110,6 +148,10 @@ class ServiceOrderAPI:
         def list_order():
             return self.list_order(request.args)
         
+        @self.app.route("/api/v1/dashboard", methods=["GET"])
+        def list_data():
+            return self.list_data()
+
         @self.app.route("/api/v1/config", methods=["POST"])
         def update_config():
             return self.update_config(request.json)
@@ -117,6 +159,21 @@ class ServiceOrderAPI:
         @self.app.route("/api/v1/mqtt", methods=["POST"])
         def update_mqtt():
             return self.update_mqtt(request.json)
+        
+        # 静态文件路由（React build）
+        @self.app.route("/", defaults={"path": ""})
+        @self.app.route("/<path:path>")
+        def serve_react(path):
+            # 如果是静态文件则返回它
+            full_path = os.path.join(self.BUILD_DIR, path)
+            # print(f"[serve_react] path={path}, full_path={full_path}, exists={os.path.exists(full_path)}")
+            if path != "" and os.path.exists(full_path):
+                return send_from_directory(self.BUILD_DIR, path)
+            else:
+                # 否则返回 index.html（React 前端路由）
+                return send_from_directory(self.BUILD_DIR, "index.html")
+
+        # print("Flask URL Map:", self.app.url_map)
 
     def create_order(self, data):
         customer_id = data.get("customer_id")
@@ -204,7 +261,14 @@ class ServiceOrderAPI:
             return jsonify(result), 200
         except Exception as e:
             return jsonify({"status": "fail", "error": str(e)}), 500
-        
+
+    def list_data(self):
+        data = self._get_data()
+        for i in range(6):
+            rack_key = f"RACK-A0{i+1}"
+            data[rack_key] = {"power": simulation_instance.racks[i].power_draw_kw}
+        return jsonify(data)
+
     def update_config(self, data):
         response = {}
         if "SERVER_UPDATE_INTERNAL" in data:
@@ -230,7 +294,7 @@ class ServiceOrderAPI:
         except Exception as e:
             return jsonify({"error": str(e)}), 500
     
-    def run(self, host="0.0.0.0", port=5000, debug=True):
+    def run(self, host="0.0.0.0", port=5000, debug=False):
         self.app.run(host=host, port=port, debug=debug)
 
 
