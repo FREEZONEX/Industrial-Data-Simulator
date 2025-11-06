@@ -3,7 +3,7 @@
 </p>
 
 <h1 align="center">
-  <img src="img/logo.png" alt="Industrial-Data-Simulator Logo" width="40" height="40" style="vertical-align: middle;">
+  <img src="img/logo.png" alt="Industrial-Data-Simulator Logo" width="50" height="50" align="absmiddle">
   Industrial-Data-Simulator
 </h1>
 
@@ -51,8 +51,10 @@ docker-compose up -d
 ```
 Access the frontend management interface at http://localhost:5000  
 <p align="center">
-    <img src="img/platform.png">
+    <img src="img/platform_en.png">
 </p>
+
+---
 
 ## 📈 Data Changes
 Data changes consist of **Fluctuation** ， **Simulation** and **Collection**:  

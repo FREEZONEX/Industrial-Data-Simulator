@@ -3,7 +3,7 @@
 </p>
 
 <h1 align="center">
-  <img src="img/logo.png" alt="Industrial-Data-Simulator Logo" width="40" height="40" style="vertical-align: middle;">
+  <img src="img/logo.png" alt="Industrial-Data-Simulator Logo" width="50" height="50" align="absmiddle">
   Industrial-Data-Simulator
 </h1>
 
@@ -42,13 +42,15 @@
 | 算力订单系统  |  REST API Server |
 | 订单信息数据库 |  PostgreSQL      |
 
+---
+
 ## 🚀 快速启动  
 ```bash
 docker-compose up -d
 ```
 前台管理界面访问 http://localhost:5000  
 <p align="center">
-    <img src="img/platform.png">
+    <img src="img/platform_ch.png">
 </p>
 
 ## 📈 数据变化
@@ -85,8 +87,6 @@ docker-compose up -d
 ```
 ⚠️ 注意：**只有在第一次创建订单后，数据模拟任务才会启动。**
 
----
-
 ### 2. 查询历史订单
 **Endpoint:** `GET /api/v1/orders`  
 **描述:** 查询历史计算资源租用订单。  
@@ -95,8 +95,6 @@ docker-compose up -d
 - `status` (string, optional)：按订单状态筛选 (e.g., `'Active'`, `'Completed'`, `'Processing'`)  
 
 **成功响应:** `200 OK`  
-
----
 
 ### 3. 更新数据变化速率
 **Endpoint:** `POST /api/v1/config`  
@@ -125,7 +123,9 @@ docker-compose up -d
 **描述:** 查询当前所有数据点的值。  
 **查询参数 (Query Parameters):** 无  
 **成功响应:** `200 OK`  
-  
+
+---
+
 ## 📡 支持协议与映射  
 
 ### 🔹 Modbus TCP (`localhost:5020`)  
@@ -189,6 +189,8 @@ docker-compose up -d
 | `datacenter/Rack-A04/edge/powerDraw` | Float | 机架 A04 实时功率（kW）   |
 | `datacenter/Rack-A05/edge/powerDraw` | Float | 机架 A05 实时功率（kW）   |
 | `datacenter/Rack-A06/edge/powerDraw` | Float | 机架 A06 实时功率（kW）   |
+
+---
 
 ## 📈 数据模拟流程  
 ### **1. 业务请求:** 
