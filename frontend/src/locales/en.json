@@ -31,6 +31,8 @@
     "required": "This field is required"
   },
   "dashboard": {
+    "chillerTemp": "CHILLER 201 - Temperature",
+    "chillerPressurePower": "CHILLER 201 - Pressure / Power",
     "collecting": "Collecting",
     "stopCollecting": "Stop Collecting",
     "cdwp_chwp_title": "CDWP 301 / CHWP 201",

@@ -163,7 +163,7 @@ const Dashboard = () => {
 
         {/* CHILLER 201 - 温度类 */}
         <Col span={24}>
-          <Card title="CHILLER 201 - 温度类">
+          <Card title={t("dashboard.chillerTemp")}>
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={chillerData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -182,7 +182,7 @@ const Dashboard = () => {
 
         {/* CHILLER 201 - 压力 & 功耗 */}
         <Col span={24}>
-          <Card title="CHILLER 201 - 压力 / 功耗">
+          <Card title={t("dashboard.chillerPressurePower")}>
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={chillerData}>
                 <CartesianGrid strokeDasharray="3 3" />

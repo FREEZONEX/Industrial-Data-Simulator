@@ -31,6 +31,8 @@
     "required": "此项为必填"
   },
   "dashboard": {
+    "chillerTemp": "CHILLER 201 - 温度类",
+    "chillerPressurePower": "CHILLER 201 - 压力 / 功耗",
     "collecting": "采集中",
     "stopCollecting": "停止采集",
     "cdwp_chwp_title": "CDWP 301 / CHWP 201",
