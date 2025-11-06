@@ -64,24 +64,3 @@ class OPCUAServer:
             print("shutting down")
         finally:
             self.server.stop()
-
-# # init Pump instance
-# server = Server()
-# cdwp_301 = Pump("Running", 150.5, 3.2, 22.7)
-# chwp_201 = Pump("Running", 120.8, 4.1, 35.2)
-
-# my_server = PumpOPCUAServer(server)
-# my_server.add_pump("CDWP-301", cdwp_301)
-# my_server.add_pump("CHWP-201", chwp_201)
-
-# server_thread = threading.Thread(target=my_server.run, daemon=True)
-# server_thread.start()
-
-# print("OPC UA Server is running in background thread.")
-
-# # 主线程继续执行其他任务，保持程序不退出
-# try:
-#     while True:
-#         time.sleep(10)
-# except KeyboardInterrupt:
-#     print("Main thread interrupted, exiting.")

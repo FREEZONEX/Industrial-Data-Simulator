@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { getOrders } from "../api";
 import { Form, Input, Select, Button, List, Card, Descriptions } from "antd";
+import { useTranslation } from "react-i18next";
 
 const { Option } = Select;
 
@@ -10,8 +11,8 @@ function OrderList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const customer_id = searchParams.get("customer_id") || "";
   const status = searchParams.get("status") || "";
-
   const [form] = Form.useForm();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const params = {};
@@ -30,21 +31,26 @@ function OrderList() {
 
   return (
     <div>
-      <h2>历史订单</h2>
+      <h2>{t("orderList.title")}</h2>
+
       <Form form={form} layout="inline" onFinish={handleFinish} style={{ marginBottom: 16 }}>
         <Form.Item name="customer_id">
-          <Input placeholder="客户ID" />
+          <Input placeholder={t("orderList.customer_id_placeholder")} />
         </Form.Item>
+
         <Form.Item name="status">
-          <Select placeholder="全部状态" style={{ width: 150 }}>
-            <Option value="">全部状态</Option>
-            <Option value="Active">Active</Option>
-            <Option value="Processing">Processing</Option>
-            <Option value="Completed">Completed</Option>
+          <Select placeholder={t("orderList.status_all")} style={{ width: 150 }}>
+            <Option value="">{t("orderList.status_all")}</Option>
+            <Option value="Active">{t("orderList.status_active")}</Option>
+            <Option value="Processing">{t("orderList.status_processing")}</Option>
+            <Option value="Completed">{t("orderList.status_completed")}</Option>
           </Select>
         </Form.Item>
+
         <Form.Item>
-          <Button type="primary" htmlType="submit">筛选</Button>
+          <Button type="primary" htmlType="submit">
+            {t("orderList.filter")}
+          </Button>
         </Form.Item>
       </Form>
 
@@ -55,15 +61,15 @@ function OrderList() {
         renderItem={(o) => (
           <List.Item>
             <Card>
-              <Descriptions title={`订单 ${o.order_id}`} bordered column={1}>
-                <Descriptions.Item label="客户ID">{o.customer_id}</Descriptions.Item>
-                <Descriptions.Item label="状态">{o.status}</Descriptions.Item>
-                <Descriptions.Item label="创建时间">{o.created_at}</Descriptions.Item>
-                <Descriptions.Item label="激活时间">{o.activated_at}</Descriptions.Item>
-                <Descriptions.Item label="租用时长（月）">{o.duration_months}</Descriptions.Item>
-                <Descriptions.Item label="CPU 核数">{o.requested_resources.cpu_cores}</Descriptions.Item>
-                <Descriptions.Item label="内存 GB">{o.requested_resources.memory_gb}</Descriptions.Item>
-                <Descriptions.Item label="存储 TB">{o.requested_resources.storage_tb}</Descriptions.Item>
+              <Descriptions title={`${t("orderList.order")} ${o.order_id}`} bordered column={1}>
+                <Descriptions.Item label={t("orderList.customer_id")}>{o.customer_id}</Descriptions.Item>
+                <Descriptions.Item label={t("orderList.status")}>{t(`order.status_${o.status.toLowerCase()}`)}</Descriptions.Item>
+                <Descriptions.Item label={t("orderList.created_at")}>{o.created_at}</Descriptions.Item>
+                <Descriptions.Item label={t("orderList.activated_at")}>{o.activated_at}</Descriptions.Item>
+                <Descriptions.Item label={t("orderList.duration_months")}>{o.duration_months}</Descriptions.Item>
+                <Descriptions.Item label={t("orderList.cpu_cores")}>{o.requested_resources.cpu_cores}</Descriptions.Item>
+                <Descriptions.Item label={t("orderList.memory_gb")}>{o.requested_resources.memory_gb}</Descriptions.Item>
+                <Descriptions.Item label={t("orderList.storage_tb")}>{o.requested_resources.storage_tb}</Descriptions.Item>
               </Descriptions>
             </Card>
           </List.Item>

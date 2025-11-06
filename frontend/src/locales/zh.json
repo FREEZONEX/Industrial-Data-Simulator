@@ -1,0 +1,90 @@
+{
+  "app": {
+    "siderTitle": "计算资源管理",
+    "headerTitle": "测试系统控制台",
+    "footer": "计算资源管理系统"
+  },
+  "menu": {
+    "orderList": "订单列表",
+    "createOrder": "创建订单",
+    "config": "配置",
+    "mqtt": "MQTT",
+    "dashboard": "仪表盘"
+  },
+  "config": {
+    "serverUpdateInterval": "服务器更新间隔",
+    "randomUpdateInterval": "数据波动间隔",
+    "updateButton": "更新配置",
+    "updateSuccess": "配置更新成功",
+    "updateFail": "配置更新失败，请重试",
+    "required": "该字段为必填项"
+  },
+  "order": {
+    "customerId": "客户ID",
+    "cpuCores": "CPU 核数",
+    "memoryGb": "内存 (GB)",
+    "storageTb": "存储 (TB)",
+    "durationMonths": "租用时长（月）",
+    "createButton": "创建订单",
+    "createSuccess": "订单创建成功！",
+    "createFail": "创建失败，请重试",
+    "required": "此项为必填"
+  },
+  "dashboard": {
+    "chillerTemp": "CHILLER 201 - 温度类",
+    "chillerPressurePower": "CHILLER 201 - 压力 / 功耗",
+    "collecting": "采集中",
+    "stopCollecting": "停止采集",
+    "cdwp_chwp_title": "CDWP 301 / CHWP 201",
+    "cdwpPressure": "CDWP 压力",
+    "cdwpFlow": "CDWP 流量",
+    "cdwpPower": "CDWP 功耗",
+    "chwpPressure": "CHWP 压力",
+    "chwpFlow": "CHWP 流量",
+    "chwpPower": "CHWP 功耗",
+    "valvePosition": "阀门位置",
+    "fanSpeed": "风扇转速",
+    "returnAirTemp": "回风温度",
+    "supplyAirTemp": "送风温度",
+    "basinWaterLevel": "水池水位",
+    "enteringWaterTemp": "进水温度",
+    "towerBasinTemp": "水池温度",
+    "towerTopAirTemp": "塔顶空气温度",
+    "totalPower": "总功耗",
+    "rackPower": "功率",
+    "leavingWaterTemp": "出水温度",
+    "condenserEnterTemp": "冷凝器进水温度",
+    "condenserLeaveTemp": "冷凝器出水温度",
+    "condensingPressure": "冷媒冷凝压力",
+    "evaporatingPressure": "冷媒蒸发压力",
+    "compressorLoad": "压缩机负载"
+  },
+  "mqtt": {
+    "broker_address": "Broker 地址",
+    "broker_required": "请输入 Broker 地址",
+    "broker_placeholder": "例如：mqtt.example.com",
+    "port": "端口",
+    "port_required": "请输入端口号",
+    "update_button": "更新 MQTT",
+    "update_success": "MQTT Broker 更新成功",
+    "update_fail": "更新失败，请重试"
+  },
+  "orderList": {
+    "title": "历史订单",
+    "customer_id_placeholder": "客户ID",
+    "status_all": "全部状态",
+    "status_active": "进行中",
+    "status_processing": "处理中",
+    "status_completed": "已完成",
+    "filter": "筛选",
+    "order": "订单",
+    "customer_id": "客户ID",
+    "status": "状态",
+    "created_at": "创建时间",
+    "activated_at": "激活时间",
+    "duration_months": "租用时长（月）",
+    "cpu_cores": "CPU 核数",
+    "memory_gb": "内存 (GB)",
+    "storage_tb": "存储 (TB)"
+  }
+}

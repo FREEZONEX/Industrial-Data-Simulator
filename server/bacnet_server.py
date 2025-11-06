@@ -39,10 +39,3 @@ class BacnetServer:
             
     async def start(self):
         await self.run()
-
-# async def main():
-#     crah_101 = Crah("running", 32.5, 21.0, 78.0, 90.0)
-#     device = BacnetServer(crah_101)
-#     await device.run()
-
-# asyncio.run(main())

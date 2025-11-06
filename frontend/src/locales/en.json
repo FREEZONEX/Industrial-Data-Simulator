@@ -1,0 +1,91 @@
+{
+  "app": {
+    "siderTitle": "Resource Manager",
+    "headerTitle": "Testing System Console",
+    "footer": "Compute Resource Management System"
+  },
+  "menu": {
+    "orderList": "Order List",
+    "createOrder": "Create Order",
+    "config": "Configuration",
+    "mqtt": "MQTT",
+    "dashboard": "Dashboard"
+  },
+  "config": {
+    "serverUpdateInterval": "Server Update Interval",
+    "randomUpdateInterval": "Random Update Interval",
+    "updateButton": "Update Config",
+    "updateSuccess": "Configuration updated successfully",
+    "updateFail": "Failed to update configuration, please try again",
+    "required": "This field is required"
+  },
+  "order": {
+    "customerId": "Customer ID",
+    "cpuCores": "CPU Cores",
+    "memoryGb": "Memory (GB)",
+    "storageTb": "Storage (TB)",
+    "durationMonths": "Duration (months)",
+    "createButton": "Create Order",
+    "createSuccess": "Order created successfully!",
+    "createFail": "Failed to create order, please retry",
+    "required": "This field is required"
+  },
+  "dashboard": {
+    "chillerTemp": "CHILLER 201 - Temperature",
+    "chillerPressurePower": "CHILLER 201 - Pressure / Power",
+    "collecting": "Collecting",
+    "stopCollecting": "Stop Collecting",
+    "cdwp_chwp_title": "CDWP 301 / CHWP 201",
+    "cdwpPressure": "CDWP Pressure",
+    "cdwpFlow": "CDWP Flow Rate",
+    "cdwpPower": "CDWP Power",
+    "chwpPressure": "CHWP Pressure",
+    "chwpFlow": "CHWP Flow Rate",
+    "chwpPower": "CHWP Power",
+    "valvePosition": "Valve Position",
+    "fanSpeed": "Fan Speed",
+    "returnAirTemp": "Return Air Temperature",
+    "supplyAirTemp": "Supply Air Temperature",
+    "basinWaterLevel": "Basin Water Level",
+    "enteringWaterTemp": "Entering Water Temp",
+    "towerBasinTemp": "Basin Temperature",
+    "towerTopAirTemp": "Top Air Temperature",
+    "totalPower": "Total Power",
+    "rackPower": "Power",
+    "leavingWaterTemp": "Leaving Water Temp",
+    "condenserEnterTemp": "Condenser Inlet Temp",
+    "condenserLeaveTemp": "Condenser Outlet Temp",
+    "condensingPressure": "Condensing Pressure",
+    "evaporatingPressure": "Evaporating Pressure",
+    "compressorLoad": "Compressor Load"
+  },
+  "mqtt": {
+    "broker_address": "Broker Address",
+    "broker_required": "Please enter the broker address",
+    "broker_placeholder": "e.g. mqtt.example.com",
+    "port": "Port",
+    "port_required": "Please enter the port number",
+    "update_button": "Update MQTT",
+    "update_success": "MQTT Broker updated successfully",
+    "update_fail": "Update failed, please try again"
+  },
+  "orderList": {
+    "title": "Order History",
+    "customer_id_placeholder": "Customer ID",
+    "status_all": "All Status",
+    "status_active": "Active",
+    "status_processing": "Processing",
+    "status_completed": "Completed",
+    "filter": "Filter",
+    "order": "Order",
+    "customer_id": "Customer ID",
+    "status": "Status",
+    "created_at": "Created At",
+    "activated_at": "Activated At",
+    "duration_months": "Duration (months)",
+    "cpu_cores": "CPU Cores",
+    "memory_gb": "Memory (GB)",
+    "storage_tb": "Storage (TB)"
+  }
+}
+
