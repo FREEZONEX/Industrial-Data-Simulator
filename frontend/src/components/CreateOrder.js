@@ -1,10 +1,12 @@
 import React from "react";
 import { Form, Input, InputNumber, Button, message } from "antd";
 import { createOrder } from "../api";
+import { useTranslation } from "react-i18next";
 
 function CreateOrder() {
   const [form] = Form.useForm();
-  const [messageApi, contextHolder] = message.useMessage(); // 获取 message 实例
+  const [messageApi, contextHolder] = message.useMessage();
+  const { t } = useTranslation();
 
   const handleFinish = async (values) => {
     try {
@@ -18,40 +20,60 @@ function CreateOrder() {
         duration_months: values.duration_months,
       };
       await createOrder(payload);
-      messageApi.success("订单创建成功！"); // 使用实例显示
+      messageApi.success(t("order.createSuccess"));
       form.resetFields();
     } catch (err) {
       console.error(err);
-      messageApi.error("创建失败"); // 使用实例显示
+      messageApi.error(t("order.createFail"));
     }
   };
 
   return (
     <>
-      {contextHolder} {/* 必须渲染在组件里 */}
+      {contextHolder}
       <Form form={form} layout="vertical" onFinish={handleFinish}>
-        <Form.Item label="客户ID" name="customer_id" rules={[{ required: true }]}>
+        <Form.Item
+          label={t("order.customerId")}
+          name="customer_id"
+          rules={[{ required: true, message: t("order.required") }]}
+        >
           <Input />
         </Form.Item>
 
-        <Form.Item label="CPU 核数" name="cpu_cores" rules={[{ required: true }]}>
+        <Form.Item
+          label={t("order.cpuCores")}
+          name="cpu_cores"
+          rules={[{ required: true, message: t("order.required") }]}
+        >
           <InputNumber style={{ width: "100%" }} />
         </Form.Item>
 
-        <Form.Item label="内存GB" name="memory_gb" rules={[{ required: true }]}>
+        <Form.Item
+          label={t("order.memoryGb")}
+          name="memory_gb"
+          rules={[{ required: true, message: t("order.required") }]}
+        >
           <InputNumber style={{ width: "100%" }} />
         </Form.Item>
 
-        <Form.Item label="存储TB" name="storage_tb" rules={[{ required: true }]}>
+        <Form.Item
+          label={t("order.storageTb")}
+          name="storage_tb"
+          rules={[{ required: true, message: t("order.required") }]}
+        >
           <InputNumber style={{ width: "100%" }} />
         </Form.Item>
 
-        <Form.Item label="租用时长（月）" name="duration_months" rules={[{ required: true }]}>
+        <Form.Item
+          label={t("order.durationMonths")}
+          name="duration_months"
+          rules={[{ required: true, message: t("order.required") }]}
+        >
           <InputNumber style={{ width: "100%" }} />
         </Form.Item>
 
         <Button type="primary" htmlType="submit">
-          创建订单
+          {t("order.createButton")}
         </Button>
       </Form>
     </>

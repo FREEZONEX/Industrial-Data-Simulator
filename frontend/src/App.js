@@ -1,7 +1,6 @@
-// frontend/src/App.js
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
-import { Layout, Menu, Typography } from "antd";
+import { Layout, Menu, Typography, Button } from "antd";
 import {
   UnorderedListOutlined,
   PlusOutlined,
@@ -9,6 +8,7 @@ import {
   CloudServerOutlined,
   AreaChartOutlined
 } from "@ant-design/icons";
+import { useTranslation } from 'react-i18next';
 
 import CreateOrder from "./components/CreateOrder";
 import OrderList from "./components/OrderList";
@@ -19,8 +19,8 @@ import Dashboard from "./components/Dashboard";
 const { Header, Content, Footer, Sider } = Layout;
 const { Title } = Typography;
 
-// 菜单组件
 const NavigationMenu = () => {
+  const { t } = useTranslation();
   const location = useLocation();
   const selectedKey = location.pathname === "/" ? "/orders" : location.pathname;
 
@@ -30,76 +30,50 @@ const NavigationMenu = () => {
       mode="inline"
       selectedKeys={[selectedKey]}
       items={[
-        {
-          key: "/orders",
-          icon: <UnorderedListOutlined />,
-          label: <Link to="/orders">订单列表</Link>,
-        },
-        {
-          key: "/create",
-          icon: <PlusOutlined />,
-          label: <Link to="/create">创建订单</Link>,
-        },
-        {
-          key: "/config",
-          icon: <SettingOutlined />,
-          label: <Link to="/config">配置</Link>,
-        },
-        {
-          key: "/mqtt",
-          icon: <CloudServerOutlined />,
-          label: <Link to="/mqtt">MQTT</Link>,
-        },
-        {
-          key: "/dashboard",
-          icon: <AreaChartOutlined />,
-          label: <Link to="/dashboard">仪表盘</Link>,
-        },
+        { key: "/orders", icon: <UnorderedListOutlined />, label: <Link to="/orders">{t('menu.orderList')}</Link> },
+        { key: "/create", icon: <PlusOutlined />, label: <Link to="/create">{t('menu.createOrder')}</Link> },
+        { key: "/config", icon: <SettingOutlined />, label: <Link to="/config">{t('menu.config')}</Link> },
+        { key: "/mqtt", icon: <CloudServerOutlined />, label: <Link to="/mqtt">{t('menu.mqtt')}</Link> },
+        { key: "/dashboard", icon: <AreaChartOutlined />, label: <Link to="/dashboard">{t('menu.dashboard')}</Link> },
       ]}
     />
   );
 };
 
 function App() {
+  const { t, i18n } = useTranslation();
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng); // 切换语言
+  };
+
   return (
     <Router>
       <Layout style={{ minHeight: "100vh" }}>
-        {/* 侧边导航 */}
         <Sider collapsible>
-          <div
-            style={{
-              height: 64,
-              margin: 16,
-              color: "#fff",
-              fontWeight: "bold",
-              textAlign: "center",
-              lineHeight: "64px",
-              fontSize: 16,
-            }}
-          >
-            计算资源管理
+          <div style={{
+            height: 64, margin: 16, color: "#fff", fontWeight: "bold",
+            textAlign: "center", lineHeight: "64px", fontSize: 16
+          }}>
+            {t('app.siderTitle')}
           </div>
           <NavigationMenu />
         </Sider>
 
         <Layout>
-          {/* 顶部 */}
-          <Header style={{ background: "#fff", paddingLeft: 25, display: "flex", alignItems: "center",}}>
-            <Title level={3} style={{ margin: 0 }}>
-              测试系统控制台
-            </Title>
+          <Header style={{
+            background: "#fff", paddingLeft: 25, display: "flex",
+            alignItems: "center", justifyContent: "space-between"
+          }}>
+            <Title level={3} style={{ margin: 0 }}>{t('app.headerTitle')}</Title>
+            <div>
+              <Button size="small" onClick={() => changeLanguage('zh')} style={{ marginRight: 8 }}>中文</Button>
+              <Button size="small" onClick={() => changeLanguage('en')}>EN</Button>
+            </div>
           </Header>
 
-          {/* 内容区 */}
           <Content style={{ margin: "16px" }}>
-            <div
-              style={{
-                padding: 24,
-                minHeight: 360,
-                background: "#fff",
-                borderRadius: 8,
-              }}
-            >
+            <div style={{ padding: 24, minHeight: 360, background: "#fff", borderRadius: 8 }}>
               <Routes>
                 <Route path="/orders" element={<OrderList />} />
                 <Route path="/create" element={<CreateOrder />} />
@@ -111,10 +85,7 @@ function App() {
             </div>
           </Content>
 
-          {/* 底部 */}
-          <Footer style={{ textAlign: "center" }}>
-            计算资源管理系统
-          </Footer>
+          <Footer style={{ textAlign: "center" }}>{t('app.footer')}</Footer>
         </Layout>
       </Layout>
     </Router>

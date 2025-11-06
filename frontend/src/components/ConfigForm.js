@@ -1,18 +1,20 @@
 import React from "react";
 import { updateConfig } from "../api";
 import { Form, InputNumber, Button, message } from "antd";
+import { useTranslation } from "react-i18next";
 
 function ConfigForm() {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
+  const { t } = useTranslation(); // i18n
 
   const handleFinish = async (values) => {
     try {
       await updateConfig(values);
-      messageApi.success("配置更新成功"); // 使用实例显示
+      messageApi.success(t('config.updateSuccess')); // 国际化提示
     } catch (err) {
       console.error(err);
-      messageApi.error("配置更新失败，请重试");
+      messageApi.error(t('config.updateFail'));
     }
   };
 
@@ -26,23 +28,23 @@ function ConfigForm() {
         initialValues={{ SERVER_UPDATE_INTERNAL: 1, RANDOM_UPDATE_INTERVAL: 1 }}
       >
         <Form.Item
-          label="服务器更新间隔"
+          label={t('config.serverUpdateInterval')}
           name="SERVER_UPDATE_INTERNAL"
-          rules={[{ required: true }]}
+          rules={[{ required: true, message: t('config.required') }]}
         >
           <InputNumber step={0.1} style={{ width: "100%" }} />
         </Form.Item>
 
         <Form.Item
-          label="数据波动间隔"
+          label={t('config.randomUpdateInterval')}
           name="RANDOM_UPDATE_INTERVAL"
-          rules={[{ required: true }]}
+          rules={[{ required: true, message: t('config.required') }]}
         >
           <InputNumber step={0.1} style={{ width: "100%" }} />
         </Form.Item>
 
         <Button type="primary" htmlType="submit">
-          更新配置
+          {t('config.updateButton')}
         </Button>
       </Form>
     </>
