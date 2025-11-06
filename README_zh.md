@@ -2,10 +2,10 @@
   <a href="README.md">English</a> | <a href="README_zh.md">中文</a>
 </p>
 
-<div align="center">
-  <img src="img/logo.png" alt="Industrial-Data-Simulator Logo" width="40" height="40" style="vertical-align: middle; margin-right: 5px;">
-  <span style="font-size: 36px; font-weight: bold; vertical-align: middle;">Industrial-Data-Simulator</span>
-</div>
+<h1 align="center">
+  <img src="img/logo.png" alt="Industrial-Data-Simulator Logo" width="40" height="40" style="vertical-align: middle;">
+  Industrial-Data-Simulator
+</h1>
 
 <p align="center">
   <b>一个用于 UNS 的多功能工业数据源模拟器</b><br>
