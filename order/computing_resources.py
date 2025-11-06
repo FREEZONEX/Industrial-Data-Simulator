@@ -296,21 +296,3 @@ class ServiceOrderAPI:
     
     def run(self, host="0.0.0.0", port=5000, debug=False):
         self.app.run(host=host, port=port, debug=debug)
-
-
-# if __name__ == "__main__":
-#     db_config = {
-#         'host': 'localhost',
-#         'port': 5432,
-#         'dbname': 'mydatabase',
-#         'user': 'myuser',
-#         'password': 'mypassword'
-#     }
-#     config = {
-#     "SERVER_UPDATE_INTERNAL": 5.0,
-#     "RANDOM_UPDATE_INTERVAL": 10.0
-#     }
-
-#     api = ServiceOrderAPI(db_config, config)
-
-#     api.run()

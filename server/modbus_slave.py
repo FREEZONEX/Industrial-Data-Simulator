@@ -36,11 +36,3 @@ class ModbusServer:
         """启动 Modbus 服务器"""
         asyncio.create_task(self._update_context_loop())
         await StartAsyncTcpServer(context=self.context, address=self.address)
-
-
-# if __name__ == "__main__":
-#     try:
-#         server = ModbusServer(address=("0.0.0.0", 5020), update_interval=10)
-#         asyncio.run(server.start())
-#     except KeyboardInterrupt:
-#         print("Server stopped by user.")

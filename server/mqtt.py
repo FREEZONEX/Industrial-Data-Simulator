@@ -83,12 +83,3 @@ class MqttPublisher:
         self.connect()
         self.publish_loop(config=config)
         self.disconnect()
-
-# if __name__ == "__main__":
-#     rack_ids = ["Rack-A01", "Rack-A02", "Rack-A03", "Rack-A04", "Rack-A05", "Rack-A06"]
-#     racks = [Rack(rid, 150) for rid in rack_ids]
-
-#     publisher = MqttPublisher(racks)
-#     publisher.connect()
-#     publisher.publish_loop(update_interval=1)
-#     publisher.disconnect()
